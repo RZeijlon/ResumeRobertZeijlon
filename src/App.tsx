@@ -1,17 +1,22 @@
 import './App.css'
 import { FaLinkedin, FaGithub, FaEnvelope, FaPhone } from 'react-icons/fa'
+import StarfieldBackground from './StarfieldBackground'
 
 function App() {
   return (
     <div className="App">
+      <StarfieldBackground />
       <header className="header">
         <nav className="nav">
-          <h1>Robert Zeijlon</h1>
-          <ul>
-            <li><a href="#about">About</a></li>
-            <li><a href="#projects">Projects</a></li>
-            <li><a href="#contact">Contact</a></li>
-          </ul>
+          <img src="/images/profile.jpg" alt="Robert Zeijlon" className="profile-image" />
+          <div className="nav-content">
+            <h1>Robert Zeijlon</h1>
+            <ul>
+              <li><a href="#about">About</a></li>
+              <li><a href="#projects">Projects</a></li>
+              <li><a href="#contact">Contact</a></li>
+            </ul>
+          </div>
         </nav>
       </header>
 
@@ -111,9 +116,28 @@ function App() {
               </div>
             </div>
             
-            <div className="project-card">
-              <h3>📊 More Projects Coming Soon</h3>
-              <p>Additional projects showcasing AI/ML capabilities, infrastructure automation, and full-stack development will be featured here.</p>
+            <div className="project-card featured">
+              <h3>🖥️ DIY AI Server Build</h3>
+              <p className="project-tech">Hardware • Dell PowerEdge R730 • NVIDIA Tesla P100 • Linux</p>
+              <p className="project-description">
+                A humorous journey documenting the trials and triumphs of building a custom AI training server from scratch. 
+                What started as a simple hardware upgrade became an epic adventure in creative problem-solving.
+              </p>
+              <div className="project-highlights">
+                <h4>Epic Challenges Conquered:</h4>
+                <ul>
+                  <li>🔧 Transformed Dell Precision 5600 into functional AI workstation</li>
+                  <li>⚡ Manually rewired power supply for GPU compatibility</li>
+                  <li>🏠 Relocated entire server to outbuilding for noise/heat management</li>
+                  <li>🎯 Achieved stable AI model training environment</li>
+                  <li>📝 Documented entire journey in journal-style format</li>
+                </ul>
+              </div>
+              <div className="project-links">
+                <a href="https://github.com/Atbice/ai-server" target="_blank" rel="noopener noreferrer">
+                  View Documentation
+                </a>
+              </div>
             </div>
           </div>
         </section>
