@@ -1,11 +1,11 @@
 import './App.css'
 import { FaLinkedin, FaGithub, FaEnvelope, FaPhone } from 'react-icons/fa'
-import StarfieldBackground from './StarfieldBackground'
+import MatrixBackground from './MatrixBackground'
 
 function App() {
   return (
     <div className="App">
-      <StarfieldBackground />
+      <MatrixBackground />
       <header className="header">
         <nav className="nav">
           <img src="/images/profile.jpg" alt="Robert Zeijlon" className="profile-image" />
@@ -22,17 +22,25 @@ function App() {
 
       <main>
         <section id="hero" className="hero">
-          <h2>AI Developer & Infrastructure Enthusiast</h2>
-          <p>Specializing in local AI models, self-hosted solutions, and cutting-edge machine learning technologies</p>
+          <div className="hero-title">
+            <h2>AI Developer & Infrastructure Enthusiast</h2>
+          </div>
+          <div className="hero-text">
+            <p>Specializing in local AI models, self-hosted solutions, and cutting-edge machine learning technologies</p>
+          </div>
         </section>
 
         <section id="about" className="about">
-          <h2>About Me</h2>
+          <div className="about-header">
+            <h2>About Me</h2>
+          </div>
           <div className="about-content">
-            <p>
-              Recent AI Developer graduate with a passion for cutting-edge artificial intelligence and machine learning technologies. 
-              I specialize in building robust AI solutions from research to production, with a strong focus on local models and self-hosted infrastructure.
-            </p>
+            <div className="about-intro">
+              <p>
+                Recent AI Developer graduate with a passion for cutting-edge artificial intelligence and machine learning technologies. 
+                I specialize in building robust AI solutions from research to production, with a strong focus on local models and self-hosted infrastructure.
+              </p>
+            </div>
             
             <div className="skills-grid">
               <div className="skill-category">
@@ -87,7 +95,9 @@ function App() {
         </section>
 
         <section id="projects" className="projects">
-          <h2>Featured Projects</h2>
+          <div className="projects-header">
+            <h2>Featured Projects</h2>
+          </div>
           <div className="project-grid">
             <div className="project-card featured">
               <div className="project-image">
@@ -143,8 +153,13 @@ function App() {
         </section>
 
         <section id="contact" className="contact">
-          <h2>Get In Touch</h2>
-          <p>Let's connect and discuss opportunities in AI development and technology!</p>
+          <div className="contact-header">
+            <h2>Get In Touch</h2>
+          </div>
+          
+          <div className="contact-intro">
+            <p>Let's connect and discuss opportunities in AI development and technology!</p>
+          </div>
           
           <div className="contact-links">
             <a href="https://www.linkedin.com/in/robert-zeijlon-14015928b" target="_blank" rel="noopener noreferrer" className="contact-link linkedin">
