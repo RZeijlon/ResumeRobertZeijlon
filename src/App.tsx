@@ -1,17 +1,56 @@
 import './App.css'
-import { FaLinkedin, FaGithub, FaEnvelope, FaPhone } from 'react-icons/fa'
+import { FaLinkedin, FaGithub, FaEnvelope, FaPhone, FaUniversalAccess } from 'react-icons/fa'
 import MatrixBackground from './MatrixBackground'
+import { useState, useEffect } from 'react'
 
 function App() {
+  const [showAccessibilityMenu, setShowAccessibilityMenu] = useState(false)
+  const [noAnimation, setNoAnimation] = useState(false)
+  const [highVisibility, setHighVisibility] = useState(false)
+
   return (
-    <div className="App">
-      <MatrixBackground />
+    <div className={`App ${(noAnimation || highVisibility) ? 'no-animation' : ''} ${highVisibility ? 'high-visibility' : ''}`}>
+      {!(noAnimation || highVisibility) && <MatrixBackground />}
+      
+      {/* Skip to main content link */}
+      <a href="#main" className="skip-link">Skip to main content</a>
+      
       <header className="header">
-        <nav className="nav">
+        <nav className="nav" role="navigation" aria-label="Main navigation">
           <img src="/images/profile.jpg" alt="Robert Zeijlon" className="profile-image" />
           <div className="nav-content">
             <h1>Robert Zeijlon</h1>
             <ul>
+              <li>
+                <button 
+                  className="accessibility-toggle"
+                  onClick={() => setShowAccessibilityMenu(!showAccessibilityMenu)}
+                  aria-label="Accessibility options"
+                  aria-expanded={showAccessibilityMenu}
+                >
+                  <FaUniversalAccess />
+                </button>
+                {showAccessibilityMenu && (
+                  <div className="accessibility-menu" role="menu">
+                    <label className="accessibility-option" role="menuitem">
+                      <input 
+                        type="checkbox" 
+                        checked={highVisibility}
+                        onChange={(e) => setHighVisibility(e.target.checked)}
+                      />
+                      High visibility mode
+                    </label>
+                    <label className="accessibility-option" role="menuitem">
+                      <input 
+                        type="checkbox" 
+                        checked={noAnimation}
+                        onChange={(e) => setNoAnimation(e.target.checked)}
+                      />
+                      Disable animations
+                    </label>
+                  </div>
+                )}
+              </li>
               <li><a href="#about">About</a></li>
               <li><a href="#projects">Projects</a></li>
               <li><a href="#contact">Contact</a></li>
@@ -20,7 +59,7 @@ function App() {
         </nav>
       </header>
 
-      <main>
+      <main id="main" role="main">
         <section id="hero" className="hero">
           <div className="hero-title">
             <h2>AI Developer & Infrastructure Enthusiast</h2>
