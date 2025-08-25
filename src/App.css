@@ -275,9 +275,22 @@ input:focus,
 .App.high-visibility .contact-intro,
 .App.high-visibility .contact-link,
 .App.high-visibility .accessibility-menu,
-.App.high-visibility .accessibility-popup-content {
+.App.high-visibility .accessibility-popup-content,
+.App.high-visibility .mobile-nav {
   background: var(--background-primary) !important;
   border-color: var(--border-color) !important;
+}
+
+.App.high-visibility .chat-nav-button {
+  background: var(--background-secondary) !important;
+  color: var(--text-primary) !important;
+  border: 2px solid var(--border-color) !important;
+}
+
+.App.high-visibility .mobile-menu-toggle {
+  background: var(--background-secondary) !important;
+  color: var(--text-primary) !important;
+  border: 2px solid var(--border-color) !important;
 }
 
 /* Ensure body and html also get proper background */
@@ -293,12 +306,20 @@ html:has(.App.high-visibility) {
 .nav {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   gap: 1.5rem;
   padding: 0 1rem;
   max-width: 1200px;
   margin: 0 auto;
   min-height: 100px;
+  position: relative;
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
 }
 
 .nav-content {
@@ -309,6 +330,16 @@ html:has(.App.high-visibility) {
   gap: 1rem;
   flex: 1;
   height: 100%;
+  position: relative;
+}
+
+/* Mobile layout adjustments */
+@media (max-width: 768px) {
+  .nav-content {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
 }
 
 .profile-image {
@@ -359,6 +390,163 @@ html:has(.App.high-visibility) {
 .nav a:hover {
   color: var(--seaweed-green);
   text-shadow: 0 0 8px rgba(46, 139, 69, 0.4);
+}
+
+/* Chat button in navigation */
+.chat-nav-button {
+  background: linear-gradient(135deg, var(--teal), var(--seaweed-green));
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: var(--font-size-base);
+  transition: all 0.3s ease;
+}
+
+.chat-nav-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(32, 178, 170, 0.4);
+}
+
+/* Mobile menu toggle */
+.mobile-menu-toggle {
+  display: none;
+  background: var(--seaweed-green);
+  color: white;
+  border: none;
+  padding: 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+}
+
+.mobile-menu-toggle:hover {
+  background: var(--teal);
+  transform: scale(1.05);
+}
+
+/* Navigation links containers */
+.nav-links {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.desktop-nav {
+  display: flex;
+}
+
+.mobile-nav {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: var(--background-secondary);
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1rem;
+  min-width: 200px;
+  box-shadow: 0 6px 25px rgba(32, 178, 170, 0.2);
+  z-index: 1000;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.mobile-nav li {
+  width: 100%;
+}
+
+.mobile-nav a,
+.mobile-nav .chat-nav-button {
+  width: 100%;
+  text-align: center;
+  padding: 0.75rem;
+  border-radius: 8px;
+}
+
+.mobile-nav a:hover {
+  background: rgba(32, 178, 170, 0.1);
+}
+
+/* Responsive navigation */
+@media (max-width: 768px) {
+  .nav-links.desktop-nav {
+    display: none !important;
+  }
+  
+  .mobile-menu-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .mobile-nav {
+    display: flex;
+  }
+  
+  .nav-content h1 {
+    font-size: 1.2rem;
+  }
+}
+
+/* Even smaller screens */
+@media (max-width: 480px) {
+  .nav-content h1 {
+    font-size: 1rem;
+  }
+  
+  .nav {
+    min-height: 80px;
+    gap: 1rem;
+  }
+  
+  .profile-image {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .accessibility-toggle {
+    width: 40px;
+    height: 40px;
+    font-size: 2rem;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 320px) {
+  .nav-content h1 {
+    font-size: 0.9rem;
+  }
+  
+  .nav {
+    min-height: 70px;
+    padding: 0 0.5rem;
+  }
+  
+  .profile-image {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .accessibility-toggle {
+    width: 35px;
+    height: 35px;
+    font-size: 1.8rem;
+  }
+}
+
+/* Accessibility positioning update */
+.accessibility-toggle {
+  position: relative;
+  z-index: 101;
 }
 
 main {
@@ -981,4 +1169,10 @@ main {
   .contact-links {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+/* No animation mode support for navigation */
+.App.no-animation .chat-nav-button:hover,
+.App.no-animation .mobile-menu-toggle:hover {
+  transform: none;
 }

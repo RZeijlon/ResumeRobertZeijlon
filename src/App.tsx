@@ -1,15 +1,37 @@
 import './App.css'
-import { FaLinkedin, FaGithub, FaEnvelope, FaPhone, FaUniversalAccess } from 'react-icons/fa'
+import { FaLinkedin, FaGithub, FaEnvelope, FaPhone, FaUniversalAccess, FaBars, FaTimes } from 'react-icons/fa'
 import MatrixBackground from './MatrixBackground'
+import ChatBot from './ChatBot'
 import { useState, useEffect } from 'react'
 
 function App() {
   const [showAccessibilityMenu, setShowAccessibilityMenu] = useState(false)
   const [noAnimation, setNoAnimation] = useState(false)
   const [highVisibility, setHighVisibility] = useState(false)
+  const [isChatOpen, setIsChatOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+  const [showMobileMenu, setShowMobileMenu] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  const openChat = () => {
+    // This will be handled by the ChatBot component
+    // We'll use a custom event to trigger chat opening
+    window.dispatchEvent(new CustomEvent('openChat'))
+    setShowMobileMenu(false) // Close mobile menu if open
+  }
 
   return (
-    <div className={`App ${(noAnimation || highVisibility) ? 'no-animation' : ''} ${highVisibility ? 'high-visibility' : ''}`}>
+    <div className={`App ${(noAnimation || highVisibility) ? 'no-animation' : ''} ${highVisibility ? 'high-visibility' : ''} ${isChatOpen && !isMobile ? 'chat-open' : ''}`}>
       {!(noAnimation || highVisibility) && <MatrixBackground />}
       
       {/* Skip to main content link */}
@@ -17,44 +39,68 @@ function App() {
       
       <header className="header">
         <nav className="nav" role="navigation" aria-label="Main navigation">
-          <img src="/images/profile.jpg" alt="Robert Zeijlon" className="profile-image" />
+          <div className="nav-left">
+            <img src="/images/profile.jpg" alt="Robert Zeijlon" className="profile-image" />
+            <button 
+              className="accessibility-toggle"
+              onClick={() => setShowAccessibilityMenu(!showAccessibilityMenu)}
+              aria-label="Accessibility options"
+              aria-expanded={showAccessibilityMenu}
+            >
+              <FaUniversalAccess />
+            </button>
+            {showAccessibilityMenu && (
+              <div className="accessibility-menu" role="menu">
+                <label className="accessibility-option" role="menuitem">
+                  <input 
+                    type="checkbox" 
+                    checked={highVisibility}
+                    onChange={(e) => setHighVisibility(e.target.checked)}
+                  />
+                  High visibility mode
+                </label>
+                <label className="accessibility-option" role="menuitem">
+                  <input 
+                    type="checkbox" 
+                    checked={noAnimation}
+                    onChange={(e) => setNoAnimation(e.target.checked)}
+                  />
+                  Disable animations
+                </label>
+              </div>
+            )}
+          </div>
+          
           <div className="nav-content">
-            <h1>Robert Zeijlon</h1>
-            <ul>
-              <li>
-                <button 
-                  className="accessibility-toggle"
-                  onClick={() => setShowAccessibilityMenu(!showAccessibilityMenu)}
-                  aria-label="Accessibility options"
-                  aria-expanded={showAccessibilityMenu}
-                >
-                  <FaUniversalAccess />
-                </button>
-                {showAccessibilityMenu && (
-                  <div className="accessibility-menu" role="menu">
-                    <label className="accessibility-option" role="menuitem">
-                      <input 
-                        type="checkbox" 
-                        checked={highVisibility}
-                        onChange={(e) => setHighVisibility(e.target.checked)}
-                      />
-                      High visibility mode
-                    </label>
-                    <label className="accessibility-option" role="menuitem">
-                      <input 
-                        type="checkbox" 
-                        checked={noAnimation}
-                        onChange={(e) => setNoAnimation(e.target.checked)}
-                      />
-                      Disable animations
-                    </label>
-                  </div>
-                )}
-              </li>
+            {!(showMobileMenu && isMobile) && <h1>Robert Zeijlon</h1>}
+            
+            {/* Desktop Navigation */}
+            <ul className="nav-links desktop-nav">
               <li><a href="#about">About</a></li>
               <li><a href="#projects">Projects</a></li>
               <li><a href="#contact">Contact</a></li>
+              <li><button className="chat-nav-button" onClick={openChat}>Chat</button></li>
             </ul>
+            
+            {/* Mobile Hamburger Menu */}
+            <button 
+              className="mobile-menu-toggle"
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
+              aria-label="Toggle navigation menu"
+              aria-expanded={showMobileMenu}
+            >
+              {showMobileMenu ? <FaTimes /> : <FaBars />}
+            </button>
+            
+            {/* Mobile Navigation Menu */}
+            {showMobileMenu && (
+              <ul className="nav-links mobile-nav">
+                <li><a href="#about" onClick={() => setShowMobileMenu(false)}>About</a></li>
+                <li><a href="#projects" onClick={() => setShowMobileMenu(false)}>Projects</a></li>
+                <li><a href="#contact" onClick={() => setShowMobileMenu(false)}>Contact</a></li>
+                <li><button className="chat-nav-button" onClick={openChat}>Chat</button></li>
+              </ul>
+            )}
           </div>
         </nav>
       </header>
@@ -223,6 +269,8 @@ function App() {
           </div>
         </section>
       </main>
+      
+      <ChatBot onChatToggle={setIsChatOpen} />
     </div>
   )
 }
