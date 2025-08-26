@@ -269,7 +269,7 @@ const ChatBot = ({ onChatToggle }: ChatBotProps) => {
       });
 
       // Set the transcribed text in the input field
-      setInputMessage(transcription.trim());
+      setInputMessage(String(transcription));
       
       // Optionally auto-send the message
       // await sendMessage();
@@ -322,31 +322,28 @@ const ChatBot = ({ onChatToggle }: ChatBotProps) => {
           ref={chatWindowRef}
           className={`chat-window ${isMobile ? 'mobile' : ''} ${isKeyboardOpen ? 'keyboard-open' : ''}`}
         >
-          {!isKeyboardOpen && (
-            <div className="chat-header">
-              <h3>Ask about Robert</h3>
-              <button 
-                className="chat-close"
-                onClick={() => setIsOpen(false)}
-                aria-label="Close chat"
-              >
-                <FaTimes />
-              </button>
-            </div>
-          )}
+          <div className="chat-header">
+            <h3>Ask about Robert</h3>
+            <button 
+              className="chat-close"
+              onClick={() => setIsOpen(false)}
+              aria-label="Close chat"
+            >
+              <FaTimes />
+            </button>
+          </div>
 
-          {!isKeyboardOpen && (
-            <div className="chat-messages">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`message ${message.role}`}
-                >
-                  <div className="message-content">
-                    {message.content}
-                  </div>
-                  <div className="message-time">
-                    {message.timestamp.toLocaleTimeString([], { 
+          <div className="chat-messages">
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                className={`message ${message.role}`}
+              >
+                <div className="message-content">
+                  {message.content}
+                </div>
+                <div className="message-time">
+                  {message.timestamp.toLocaleTimeString([], { 
                       hour: '2-digit', 
                       minute: '2-digit' 
                     })}
@@ -366,9 +363,17 @@ const ChatBot = ({ onChatToggle }: ChatBotProps) => {
               )}
               <div ref={messagesEndRef} />
             </div>
-          )}
 
           <div className="chat-input">
+            {isMobile && (
+              <button 
+                className="chat-close-mobile"
+                onClick={() => setIsOpen(false)}
+                aria-label="Close chat"
+              >
+                <FaTimes />
+              </button>
+            )}
             <input
               ref={inputRef}
               type="text"

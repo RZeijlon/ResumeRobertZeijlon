@@ -31,7 +31,7 @@ function App() {
   }
 
   return (
-    <div className={`App ${(noAnimation || highVisibility) ? 'no-animation' : ''} ${highVisibility ? 'high-visibility' : ''} ${isChatOpen && !isMobile ? 'chat-open' : ''}`}>
+    <div className={`App ${noAnimation ? 'no-animation' : ''} ${highVisibility ? 'high-visibility' : ''} ${isChatOpen && !isMobile ? 'chat-open' : ''}`}>
       {!(noAnimation || highVisibility) && <MatrixBackground />}
       
       {/* Skip to main content link */}

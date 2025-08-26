@@ -29,11 +29,26 @@
 }
 
 /* No Animation Mode */
-.App.no-animation *,
-.App.high-visibility * {
+.App.no-animation * {
   animation: none !important;
   transition: none !important;
   transform: none !important;
+}
+
+/* Exception: Allow chat sliding transform in no-animation mode */
+.App.no-animation.chat-open main {
+  transform: translateX(-190px) !important;
+}
+
+/* Exception: Allow chat sliding in combined no-animation + high-visibility mode */
+.App.high-visibility.no-animation.chat-open main {
+  transform: translateX(-190px) !important;
+}
+
+.App.high-visibility * {
+  animation: none !important;
+  transition: none !important;
+  /* Remove transform: none to allow chat sliding */
 }
 
 .App.no-animation .MatrixBackground,
@@ -225,7 +240,13 @@ input:focus,
 
 /* Black background when only animations are disabled */
 .App.no-animation:not(.high-visibility) {
-  background: black;
+  background: black !important;
+}
+
+/* Ensure body and html also get black background in no-animation mode */
+body:has(.App.no-animation:not(.high-visibility)),
+html:has(.App.no-animation:not(.high-visibility)) {
+  background: black !important;
 }
 
 .header {
