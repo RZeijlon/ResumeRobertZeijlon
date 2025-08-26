@@ -1,0 +1,26 @@
+{
+  "meta": {
+    "title": "Robert Zeijlon - AI Developer Portfolio",
+    "description": "AI Developer & Infrastructure Enthusiast specializing in local models and self-hosted solutions",
+    "keywords": ["AI", "Machine Learning", "React", "Python", "DevOps", "Kubernetes", "FastAPI"],
+    "author": "Robert Zeijlon"
+  },
+  "features": {
+    "chatBot": {
+      "enabled": true,
+      "welcomeFile": "components/welcome-chat.md",
+      "ragEnabled": false
+    },
+    "accessibility": {
+      "highVisibilityMode": true,
+      "noAnimationMode": true,
+      "keyboardNavigation": true
+    },
+    "matrixBackground": {
+      "enabled": true,
+      "particles": 150,
+      "speed": 1.0
+    }
+  },
+  "version": "2.0.0"
+}

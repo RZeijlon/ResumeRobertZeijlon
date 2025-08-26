@@ -1,0 +1,21 @@
+{
+  "name": "Robert Zeijlon",
+  "title": "AI Developer & Infrastructure Enthusiast",
+  "email": "robert.zeijlon.92@gmail.com",
+  "phone": "072-233 16 26",
+  "location": "Sweden",
+  "social": {
+    "linkedin": {
+      "url": "https://www.linkedin.com/in/robert-zeijlon-14015928b",
+      "username": "robert-zeijlon-14015928b"
+    },
+    "github": {
+      "url": "https://github.com/RZeijlon",
+      "username": "RZeijlon"
+    }
+  },
+  "professional": {
+    "specialization": "Specializing in local AI models, self-hosted solutions, and cutting-edge machine learning technologies",
+    "focus": "Building robust AI solutions from research to production"
+  }
+}

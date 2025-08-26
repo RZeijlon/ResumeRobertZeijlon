@@ -1,0 +1,52 @@
+{
+  "themes": {
+    "default-dark": {
+      "name": "Matrix Dark",
+      "colors": {
+        "highlight": "#20b2aa",
+        "frames": "#2e8b45",
+        "lighter-background": "#2d342d",
+        "darker-background": "#1a1f1a"
+      },
+      "effects": {
+        "matrixBackground": true,
+        "animations": true
+      }
+    },
+    "default-light": {
+      "name": "Clean Light",
+      "colors": {
+        "highlight": "#2e8b45",
+        "frames": "#20b2aa",
+        "lighter-background": "#f8f9fa",
+        "darker-background": "#ffffff"
+      },
+      "effects": {
+        "matrixBackground": false,
+        "animations": true
+      }
+    },
+    "high-contrast": {
+      "name": "High Visibility",
+      "colors": {
+        "highlight": "#000000",
+        "frames": "#000000",
+        "lighter-background": "#ffffff",
+        "darker-background": "#ffffff"
+      },
+      "effects": {
+        "matrixBackground": false,
+        "animations": false
+      }
+    }
+  },
+  "customization": {
+    "allowUserColors": true,
+    "colorMappings": {
+      "highlight": ["links", "buttons", "accent-text", "chat-user-messages"],
+      "frames": ["borders", "section-dividers", "card-outlines", "chat-borders"],
+      "lighter-background": ["cards", "panels", "secondary-areas", "chat-messages-area"],
+      "darker-background": ["main-background", "primary-areas", "chat-input"]
+    }
+  }
+}

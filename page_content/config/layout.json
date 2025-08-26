@@ -1,0 +1,77 @@
+{
+  "layout": {
+    "sections": [
+      {
+        "id": "hero",
+        "component": "HeroSection",
+        "file": "sections/hero.md",
+        "width": "full",
+        "navbar": false
+      },
+      {
+        "id": "about",
+        "component": "AboutSection",
+        "file": "sections/about.md",
+        "width": "full",
+        "navbar": { "label": "About", "order": 1 }
+      },
+      {
+        "id": "skills",
+        "component": "SkillsGrid",
+        "files": [
+          "components/skills/ai-ml.md",
+          "components/skills/development.md",
+          "components/skills/infrastructure.md",
+          "components/skills/specializations.md"
+        ],
+        "width": "dynamic",
+        "navbar": false
+      },
+      {
+        "id": "philosophy",
+        "component": "PhilosophySection",
+        "file": "components/philosophy.md",
+        "width": "full",
+        "navbar": false
+      },
+      {
+        "id": "projects",
+        "component": "ProjectsSection",
+        "file": "sections/projects.md",
+        "width": "full",
+        "navbar": { "label": "Projects", "order": 2 }
+      },
+      {
+        "id": "project-cards",
+        "component": "ProjectGrid",
+        "files": [
+          "components/projects/transcriptomatic.md",
+          "components/projects/ai-server-build.md"
+        ],
+        "width": "full",
+        "navbar": false
+      },
+      {
+        "id": "contact",
+        "component": "ContactSection",
+        "file": "sections/contact.md",
+        "width": "full",
+        "navbar": { "label": "Contact", "order": 3 }
+      }
+    ]
+  },
+  "responsive": {
+    "breakpoints": {
+      "mobile": "768px",
+      "tablet": "1024px",
+      "desktop": "1200px"
+    },
+    "gridSettings": {
+      "dynamic": {
+        "mobile": "1fr",
+        "tablet": "1fr 1fr",
+        "desktop": "repeat(2, 1fr)"
+      }
+    }
+  }
+}
