@@ -1,14 +1,13 @@
-/* CSS Custom Properties for theming */
+/* Import theme system */
+@import './styles/theme.css';
+@import './styles/components.css';
+
+/* Legacy CSS Custom Properties - now managed by theme system */
 :root {
-  --text-primary: #e8e8e8;
-  --text-secondary: #b8b8b8;
-  --seaweed-green: #2e8b45;
-  --teal: #20b2aa;
   --teal-light: #48d1cc;
   --background-primary: rgba(45, 52, 45, 0.8);
   --background-secondary: rgba(36, 43, 36, 0.95);
-  --border-color: var(--teal);
-  --font-size-base: 0.9rem;
+  --border-color: var(--frames);
   --font-size-large: 1.2rem;
   --font-size-xl: 1.8rem;
 }

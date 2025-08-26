@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { FaComments, FaTimes, FaPaperPlane, FaMicrophone, FaStop } from 'react-icons/fa';
 import Groq from 'groq-sdk';
 import './ChatBot.css';
+import { ContentItem } from './hooks/useContentManager';
 
 interface Message {
   id: string;
@@ -12,9 +13,10 @@ interface Message {
 
 interface ChatBotProps {
   onChatToggle?: (isOpen: boolean) => void;
+  welcomeMessage?: ContentItem | null;
 }
 
-const ChatBot = ({ onChatToggle }: ChatBotProps) => {
+const ChatBot = ({ onChatToggle, welcomeMessage }: ChatBotProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -293,13 +295,14 @@ const ChatBot = ({ onChatToggle }: ChatBotProps) => {
   const toggleChat = () => {
     setIsOpen(!isOpen);
     if (!isOpen && messages.length === 0) {
-      const welcomeMessage: Message = {
+      const welcomeContent = welcomeMessage?.content || 'Hi! I\'m here to help answer questions about Robert Zeijlon\'s background, skills, and projects. What would you like to know?';
+      const welcomeMsg: Message = {
         id: 'welcome',
-        content: 'Hi! I\'m here to help answer questions about Robert Zeijlon\'s background, skills, and projects. What would you like to know?',
+        content: welcomeContent,
         role: 'assistant',
         timestamp: new Date()
       };
-      setMessages([welcomeMessage]);
+      setMessages([welcomeMsg]);
     }
   };
 

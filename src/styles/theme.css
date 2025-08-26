@@ -1,0 +1,122 @@
+/* Theme System CSS Variables */
+:root {
+  /* Default theme colors - will be overridden by theme manager */
+  --color-highlight: #20b2aa;
+  --color-frames: #2e8b45;
+  --color-lighter-background: #2d342d;
+  --color-darker-background: #1a1f1a;
+  
+  /* Legacy compatibility */
+  --highlight: var(--color-highlight);
+  --frames: var(--color-frames);
+  --lighter-background: var(--color-lighter-background);
+  --darker-background: var(--color-darker-background);
+  --teal: var(--color-highlight);
+  --seaweed-green: var(--color-frames);
+  --background-primary: var(--color-lighter-background);
+  --background-secondary: var(--color-darker-background);
+  
+  /* Text colors - will be set dynamically based on background */
+  --text-primary: #e8e8e8;
+  --text-secondary: #b8b8b8;
+  --border-color: var(--color-frames);
+  
+  /* Responsive typography */
+  --font-size-base: 0.9rem;
+  --font-size-small: 0.8rem;
+  --font-size-large: 1.1rem;
+  --font-size-xl: 1.5rem;
+  --font-size-hero: 3rem;
+  
+  /* Spacing */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+  
+  /* Border radius */
+  --border-radius-sm: 8px;
+  --border-radius-md: 12px;
+  --border-radius-lg: 20px;
+  
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+}
+
+/* Theme-specific adjustments */
+.App.high-visibility {
+  --text-primary: #000000;
+  --text-secondary: #333333;
+  --font-size-base: 1.2rem;
+  --font-size-small: 1rem;
+  --font-size-large: 1.4rem;
+}
+
+.App.no-animation * {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Allow specific transforms for chat sliding even in no-animation mode */
+.App.no-animation .chat-slide-transform {
+  transition: transform var(--transition-normal) !important;
+}
+
+/* Dynamic width system for components */
+.dynamic-width {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-lg);
+}
+
+@media (min-width: 768px) {
+  .dynamic-width {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 1200px) {
+  .dynamic-width {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* Loading and error states */
+.loading, .error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  text-align: center;
+  background: var(--darker-background);
+  color: var(--text-primary);
+}
+
+.loading-spinner, .error-message {
+  background: var(--lighter-background);
+  padding: var(--spacing-xl);
+  border-radius: var(--border-radius-lg);
+  border: 2px solid var(--frames);
+  max-width: 500px;
+}
+
+.loading-spinner h2, .error-message h2 {
+  color: var(--highlight);
+  margin-bottom: var(--spacing-md);
+}
+
+.loading-spinner p, .error-message p {
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.error-message p:last-child {
+  margin-bottom: 0;
+}
