@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { ThemeConfig } from './useContentManager'
+import type { ThemeConfig } from './useContentManager'
 
 export type ThemeMode = 'default-dark' | 'default-light' | 'high-contrast' | 'custom'
 

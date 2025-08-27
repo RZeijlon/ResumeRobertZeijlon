@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { FaComments, FaTimes, FaPaperPlane, FaMicrophone, FaStop } from 'react-icons/fa';
 import Groq from 'groq-sdk';
 import './ChatBot.css';
-import { ContentItem } from './hooks/useContentManager';
+import type { ContentItem } from './hooks/useContentManager';
 
 interface Message {
   id: string;

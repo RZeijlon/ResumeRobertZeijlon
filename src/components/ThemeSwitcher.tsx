@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { FaUniversalAccess, FaSun, FaMoon, FaPalette } from 'react-icons/fa'
-import { useThemeManager, ThemeMode } from '../hooks/useThemeManager'
+import { useThemeManager } from '../hooks/useThemeManager'
 
 interface ThemeSwitcherProps {
   themeManager: ReturnType<typeof useThemeManager>

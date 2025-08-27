@@ -21,7 +21,6 @@ function App() {
     siteConfig,
     layoutConfig,
     personalInfo,
-    content,
     loading,
     error,
     getContentByPath,
@@ -186,7 +185,7 @@ function App() {
               key={section.id}
               sectionId={section.id}
               component={section.component}
-              content={sectionContent}
+              content={sectionContent || undefined}
               contents={sectionContents}
               width={section.width}
               personalInfo={personalInfo}

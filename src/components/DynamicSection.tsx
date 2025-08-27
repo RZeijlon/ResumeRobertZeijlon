@@ -1,6 +1,6 @@
 import React from 'react'
 import MarkdownRenderer from './MarkdownRenderer'
-import { ContentItem, PersonalInfo } from '../hooks/useContentManager'
+import type { ContentItem, PersonalInfo } from '../hooks/useContentManager'
 import { FaLinkedin, FaGithub, FaEnvelope, FaPhone } from 'react-icons/fa'
 
 interface DynamicSectionProps {
