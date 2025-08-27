@@ -4,7 +4,7 @@ version: '3.8'
 services:
   # PostgreSQL Database with pgvector extension
   database:
-    image: pgvector/pgvector:pg15
+    image: docker.io/pgvector/pgvector:pg15
     container_name: portfolio-db
     environment:
       POSTGRES_DB: portfolio
