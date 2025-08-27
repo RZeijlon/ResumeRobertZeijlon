@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import matter from 'gray-matter'
+import { parseFrontmatter } from '../utils/frontmatter'
 
 export interface ContentItem {
   id: string
@@ -117,7 +117,7 @@ export const useContentManager = () => {
         throw new Error(`Failed to load ${path}: ${response.statusText}`)
       }
       const rawContent = await response.text()
-      const { data: metadata, content: markdownContent } = matter(rawContent)
+      const { data: metadata, content: markdownContent } = parseFrontmatter(rawContent)
       
       return {
         id: path.replace(/^.*\//, '').replace('.md', ''),
