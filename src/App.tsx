@@ -6,7 +6,8 @@ import { useState, useEffect } from 'react'
 import { useContentManager } from './hooks/useContentManager'
 import { useThemeManager } from './hooks/useThemeManager'
 import DynamicSection from './components/DynamicSection'
-import ThemeSwitcher from './components/ThemeSwitcher'
+import SimpleThemeSwitcher from './components/SimpleThemeSwitcher'
+import AccessibilityMenu from './components/AccessibilityMenu'
 
 function App() {
   const [isChatOpen, setIsChatOpen] = useState(false)
@@ -109,7 +110,7 @@ function App() {
               alt={personalInfo.name} 
               className="profile-image" 
             />
-            <ThemeSwitcher themeManager={themeManager} />
+            <AccessibilityMenu themeManager={themeManager} />
           </div>
           
           <div className="nav-content">
@@ -129,6 +130,9 @@ function App() {
                   </button>
                 </li>
               )}
+              <li className="theme-switcher-nav">
+                <SimpleThemeSwitcher themeManager={themeManager} />
+              </li>
             </ul>
             
             {/* Mobile Hamburger Menu */}
@@ -161,6 +165,9 @@ function App() {
                     </button>
                   </li>
                 )}
+                <li className="theme-switcher-mobile">
+                  <SimpleThemeSwitcher themeManager={themeManager} showLabel={true} />
+                </li>
               </ul>
             )}
           </div>
