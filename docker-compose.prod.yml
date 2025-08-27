@@ -1,0 +1,103 @@
+# Production Environment - Docker Compose
+version: '3.8'
+
+services:
+  # PostgreSQL Database with pgvector extension
+  database:
+    image: pgvector/pgvector:pg15
+    container_name: portfolio-db-prod
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-portfolio}
+      POSTGRES_USER: ${POSTGRES_USER:-portfolio}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - portfolio-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-portfolio} -d ${POSTGRES_DB:-portfolio}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # FastAPI Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: portfolio-backend-prod
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-portfolio}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB:-portfolio}
+      - VECTOR_DB_URL=postgresql://${POSTGRES_USER:-portfolio}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB:-portfolio}
+      - CONTENT_PATH=/app/page_content
+      - FRONTEND_URL=${FRONTEND_URL:-https://robertzeijlon.com}
+      - DEBUG=false
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - RAG_ENABLED=${RAG_ENABLED:-true}
+      - SECRET_KEY=${SECRET_KEY}
+    volumes:
+      - ./page_content:/app/page_content:ro
+    networks:
+      - portfolio-network
+    depends_on:
+      database:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # React Frontend with Nginx
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: portfolio-frontend-prod
+    ports:
+      - "${FRONTEND_PORT:-80}:80"
+    networks:
+      - portfolio-network
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # Redis for caching and sessions
+  redis:
+    image: redis:7-alpine
+    container_name: portfolio-redis-prod
+    volumes:
+      - redis_data_prod:/data
+    networks:
+      - portfolio-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+  # Nginx Reverse Proxy (if needed for SSL/load balancing)
+  nginx-proxy:
+    image: nginx:alpine
+    container_name: portfolio-nginx-proxy
+    ports:
+      - "443:443"
+    volumes:
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/proxy.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - portfolio-network
+    depends_on:
+      - frontend
+    restart: unless-stopped
+    profiles:
+      - ssl
+
+volumes:
+  postgres_data_prod:
+  redis_data_prod:
+
+networks:
+  portfolio-network:
+    driver: bridge
