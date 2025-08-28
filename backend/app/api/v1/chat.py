@@ -20,9 +20,14 @@ async def chat_message(request: ChatRequest):
     """
     Process chat message with RAG support
     """
+    print(f"🔥 ===== CHAT REQUEST START ===== 🔥")
+    print(f"📝 Request: {request.dict()}")
+    print(f"🆔 User Message: '{request.message}'")
+    
     try:
         # Generate conversation ID if not provided
         conversation_id = request.conversation_id or str(uuid.uuid4())
+        print(f"🆔 Conversation ID: {conversation_id}")
         
         # Check if RAG is enabled and API keys are available
         rag_enabled = (
@@ -31,37 +36,64 @@ async def chat_message(request: ChatRequest):
             (os.getenv("GROQ_API_KEY") or os.getenv("OPENAI_API_KEY"))
         )
         
+        print(f"🧠 RAG Status Check:")
+        print(f"   - request.use_rag: {request.use_rag}")
+        print(f"   - RAG_ENABLED env: {os.getenv('RAG_ENABLED', 'not set')}")
+        print(f"   - GROQ_API_KEY present: {bool(os.getenv('GROQ_API_KEY'))}")
+        print(f"   - OPENAI_API_KEY present: {bool(os.getenv('OPENAI_API_KEY'))}")
+        print(f"   - Final rag_enabled: {rag_enabled}")
+        
         if rag_enabled:
             try:
-                # Initialize RAG service if needed
+                print(f"🧠 Initializing RAG service...")
                 await rag_service.initialize()
+                print(f"✅ RAG service initialized successfully")
                 
-                # Use RAG for intelligent response
+                print(f"🔍 Processing RAG query: '{request.message}'")
                 rag_result = await rag_service.chat(request.message)
+                print(f"✅ RAG response generated:")
+                print(f"   - Response length: {len(rag_result.get('response', ''))}")
+                print(f"   - Sources found: {len(rag_result.get('sources', []))}")
+                print(f"   - Context used: {rag_result.get('context_used', False)}")
                 
-                return ChatResponse(
+                response = ChatResponse(
                     message=rag_result["response"],
                     conversation_id=conversation_id,
                     sources=rag_result.get("sources", []),
                     timestamp=datetime.now()
                 )
+                print(f"🎉 ===== CHAT REQUEST SUCCESS (RAG) ===== 🎉")
+                return response
                 
             except Exception as e:
-                print(f"⚠️  RAG failed, falling back to basic response: {e}")
+                print(f"💥 RAG ERROR: {str(e)}")
+                print(f"📚 Error details: {e.__class__.__name__}: {str(e)}")
+                import traceback
+                print(f"🔥 Full traceback:\n{traceback.format_exc()}")
+                print(f"⚠️  Falling back to basic response...")
                 # Fall back to basic response if RAG fails
                 response_text = generate_basic_response(request.message)
         else:
+            print(f"🔧 Using basic response (RAG disabled)")
             # Use basic keyword-based response
             response_text = generate_basic_response(request.message)
         
-        return ChatResponse(
+        response = ChatResponse(
             message=response_text,
             conversation_id=conversation_id,
             sources=[],
             timestamp=datetime.now()
         )
+        print(f"🎉 ===== CHAT REQUEST SUCCESS (BASIC) ===== 🎉")
+        return response
     
     except Exception as e:
+        print(f"💥 ===== CHAT REQUEST FAILED ===== 💥")
+        print(f"❌ Unhandled error: {str(e)}")
+        print(f"🔍 Error type: {e.__class__.__name__}")
+        import traceback
+        print(f"🔥 Full traceback:\n{traceback.format_exc()}")
+        print(f"💥 ===== END ERROR ===== 💥")
         raise HTTPException(status_code=500, detail=f"Chat processing failed: {str(e)}")
 
 

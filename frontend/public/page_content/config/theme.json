@@ -3,11 +3,11 @@
     "default-dark": {
       "name": "Matrix Dark",
       "colors": {
-        "highlight": "#2e8b45",
-        "frames": "#eb4034",
+        "highlight": "#20b2aa",
+        "frames": "#2e8b45",
         "lighter-background": "#2d342d",
         "darker-background": "#1a1f1a",
-        "background-contrast": "#666666"
+        "background-contrast": "#888888"
       },
       "effects": {
         "matrixBackground": true,
@@ -18,10 +18,10 @@
       "name": "Matrix Light",
       "colors": {
         "highlight": "#20b2aa",
-        "frames": "#eb4034",
+        "frames": "#2e8b45",
         "lighter-background": "#f8f9fa",
         "darker-background": "#ffffff",
-        "background-contrast": "#333333"
+        "background-contrast": "#222222"
       },
       "effects": {
         "matrixBackground": true,

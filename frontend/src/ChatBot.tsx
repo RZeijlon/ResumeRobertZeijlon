@@ -32,7 +32,16 @@ const ChatBot = ({ onChatToggle, welcomeMessage }: ChatBotProps) => {
   const audioChunksRef = useRef<Blob[]>([]);
 
   // Use Vite proxy in development, environment variable in production
+  // In development, use empty string to leverage Vite proxy
+  // In production, use environment variable or fallback to localhost
   const API_BASE_URL = import.meta.env.PROD ? (import.meta.env.VITE_API_URL || 'http://localhost:8000') : '';
+  
+  console.log('ChatBot Environment:', {
+    isDev: !import.meta.env.PROD,
+    isProd: import.meta.env.PROD,
+    viteApiUrl: import.meta.env.VITE_API_URL,
+    apiBaseUrl: API_BASE_URL
+  });
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -133,23 +142,47 @@ const ChatBot = ({ onChatToggle, welcomeMessage }: ChatBotProps) => {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/chat/message`, {
+      const requestUrl = `${API_BASE_URL}/api/v1/chat/message`;
+      const requestBody = {
+        message: messageToSend,
+        conversation_id: conversationId || undefined,
+        use_rag: true // Enable RAG for intelligent responses
+      };
+
+      console.log('🚀 Sending chat request:', {
+        url: requestUrl,
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: requestBody
+      });
+
+      const response = await fetch(requestUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          message: messageToSend,
-          conversation_id: conversationId || undefined,
-          use_rag: true // Enable RAG for intelligent responses
-        })
+        body: JSON.stringify(requestBody)
+      });
+
+      console.log('📡 Response received:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok,
+        headers: Object.fromEntries(response.headers.entries())
       });
 
       if (!response.ok) {
-        throw new Error(`Backend request failed: ${response.status} ${response.statusText}`);
+        const errorText = await response.text();
+        console.error('❌ Backend request failed:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorBody: errorText
+        });
+        throw new Error(`Backend request failed: ${response.status} ${response.statusText} - ${errorText}`);
       }
 
       const data = await response.json();
+      console.log('✅ Chat response data:', data);
 
       // Update conversation ID if we got a new one
       if (data.conversation_id && !conversationId) {
@@ -165,10 +198,30 @@ const ChatBot = ({ onChatToggle, welcomeMessage }: ChatBotProps) => {
 
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
-      console.error('Error calling backend API:', error);
+      console.error('💥 Chat API Error:', {
+        error: error,
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        timestamp: new Date().toISOString(),
+        apiBaseUrl: API_BASE_URL,
+        requestMessage: messageToSend
+      });
+
+      let errorContent = 'I\'m experiencing technical difficulties. Please try again later.';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('Failed to fetch')) {
+          errorContent = 'Cannot connect to the chat service. Please check your network connection.';
+          console.error('🌐 Network Error: Failed to fetch - likely CORS or network issue');
+        } else if (error.message.includes('Backend request failed')) {
+          errorContent = 'The chat service returned an error. Please try again.';
+          console.error('🔧 Backend Error:', error.message);
+        }
+      }
+      
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: 'Sorry, I\'m having trouble connecting to the chat service right now. Please try again later.',
+        content: errorContent,
         role: 'assistant',
         timestamp: new Date()
       };

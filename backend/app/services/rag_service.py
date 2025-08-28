@@ -12,7 +12,7 @@ from pathlib import Path
 from app.core.config import settings
 from app.services.embedding_service import embedding_service, ContentChunk
 from app.services.content_service import content_service
-from app.utils.markdown import parse_markdown_content
+from app.utils.markdown import parse_frontmatter
 
 
 class VectorStore:
@@ -265,7 +265,7 @@ Always base your responses on the provided context about Robert's background and
                 ]
                 
                 payload = {
-                    "model": "llama-3.1-70b-versatile",  # Groq's best model
+                    "model": "llama-3.3-70b-versatile",  # Groq's best model
                     "messages": messages,
                     "temperature": 0.7,
                     "max_tokens": 1000

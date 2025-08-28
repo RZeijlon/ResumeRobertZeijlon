@@ -56,7 +56,6 @@ services:
     container_name: portfolio-frontend-dev
     working_dir: /app
     environment:
-      - VITE_API_URL=http://localhost:8000
       - CHOKIDAR_USEPOLLING=true
     volumes:
       - ./frontend:/app
