@@ -7,7 +7,7 @@ github: "https://github.com/Atbice/ai-server"
 order: 2
 ---
 
-## 🖥️ DIY AI Server Build
+## 🖥️ **DIY AI Server Build**
 
 **Tech Stack:** Hardware • Dell Precision 5600 • NVIDIA Tesla P100 • Linux
 

@@ -34,7 +34,7 @@
   z-index: 1000;
   min-width: 280px;
   max-width: 320px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+
 }
 
 .theme-section {
@@ -133,7 +133,7 @@
   padding: var(--spacing-md);
   z-index: 1001;
   min-width: 300px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+
 }
 
 .custom-theme-panel h4 {
@@ -311,7 +311,7 @@
 .project-card:hover {
   border-color: var(--highlight);
   transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgba(32, 178, 170, 0.2);
+
 }
 
 .project-card.featured {

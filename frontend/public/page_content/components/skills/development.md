@@ -4,7 +4,7 @@ title: "Development Stack"
 order: 2
 ---
 
-## Development Stack
+## **Development Stack**
 
 - **Languages**: Python, R, JavaScript, TypeScript
 - **Frameworks**: FastAPI, React, Node.js

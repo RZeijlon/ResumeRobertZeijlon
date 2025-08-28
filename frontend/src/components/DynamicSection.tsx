@@ -26,11 +26,16 @@ export const DynamicSection: React.FC<DynamicSectionProps> = ({
     return (
       <section id={sectionId} className="hero">
         <div className="hero-title">
-          <MarkdownRenderer content={content} />
+          <h1>{content.metadata.title}</h1>
         </div>
-        {personalInfo && (
+        {content.metadata.subtitle && (
           <div className="hero-text">
-            <p>{personalInfo.professional.specialization}</p>
+            <p>{content.metadata.subtitle}</p>
+          </div>
+        )}
+        {content.content.trim() && (
+          <div className="hero-text">
+            <MarkdownRenderer content={content} />
           </div>
         )}
       </section>
@@ -43,11 +48,11 @@ export const DynamicSection: React.FC<DynamicSectionProps> = ({
     return (
       <section id={sectionId} className="about">
         <div className="about-header">
-          <MarkdownRenderer content={content} />
+          <h2>{content.metadata.title}</h2>
         </div>
         <div className="about-content">
           <div className="about-intro">
-            <p>{personalInfo?.professional.focus}</p>
+            <MarkdownRenderer content={{...content, content: content.content.replace(/^#\s+.*$/m, '').trim()}} />
           </div>
         </div>
       </section>
@@ -83,10 +88,16 @@ export const DynamicSection: React.FC<DynamicSectionProps> = ({
   const renderProjectsSection = () => {
     if (!content) return null
     
+    // Debug: log the content to see what's available
+    console.log('Projects section content:', content)
+    
+    // Hardcode for now to test if the issue is with metadata
+    const title = 'Featured Projects'
+    
     return (
       <section id={sectionId} className="projects">
         <div className="projects-header">
-          <MarkdownRenderer content={content} />
+          <h2>{title}</h2>
         </div>
       </section>
     )
@@ -132,11 +143,11 @@ export const DynamicSection: React.FC<DynamicSectionProps> = ({
     return (
       <section id={sectionId} className="contact">
         <div className="contact-header">
-          <MarkdownRenderer content={content} />
+          <h2>{content.metadata.title}</h2>
         </div>
         
         <div className="contact-intro">
-          <p>Let's connect and discuss opportunities in AI development and technology!</p>
+          <MarkdownRenderer content={{...content, content: content.content.replace(/^#\s+.*$/m, '').trim()}} />
         </div>
         
         <div className="contact-links">

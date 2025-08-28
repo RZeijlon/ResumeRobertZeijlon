@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
 import { FaComments, FaTimes, FaPaperPlane, FaMicrophone, FaStop } from 'react-icons/fa';
-import Groq from 'groq-sdk';
 import './ChatBot.css';
 import type { ContentItem } from './hooks/useContentManager';
 
@@ -25,63 +24,15 @@ const ChatBot = ({ onChatToggle, welcomeMessage }: ChatBotProps) => {
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
+  const [conversationId, setConversationId] = useState<string>('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const chatWindowRef = useRef<HTMLDivElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
-  const groq = new Groq({
-    apiKey: import.meta.env.VITE_GROQ_API_KEY,
-    dangerouslyAllowBrowser: true
-  });
-
-  const portfolioContext = `
-    You are an AI assistant representing Robert Zeijlon, an AI Developer and Infrastructure Enthusiast. 
-    Here's information about Robert based on his portfolio:
-
-    BACKGROUND:
-    - Recent AI Developer graduate specializing in artificial intelligence and machine learning
-    - Passionate about local AI models and self-hosted solutions
-    - Focus on building AI solutions from research to production
-
-    SKILLS:
-    AI/ML Technologies:
-    - Machine Learning: TensorFlow, PyTorch, scikit-learn
-    - Generative AI: Local LLM implementations, API integrations
-    - Speech Processing: Near real-time transcription (KB-Whisper)
-    - Computer Vision: ComfyUI, custom vision models
-    - Model Deployment: LM-Studio, local model optimization
-
-    Development Stack:
-    - Languages: Python, R, JavaScript, TypeScript
-    - Frameworks: FastAPI, React, Node.js
-    - Data Science: pandas, numpy, Jupyter
-    - Cloud: AWS, Google Cloud, Azure ML
-
-    Infrastructure & DevOps:
-    - Kubernetes: k3s 3-node HA cluster deployment
-    - Linux Distributions: Arch, Fedora, NixOS, Debian, Ubuntu
-    - Containerization: Podman, Docker, Docker Compose
-    - Self-Hosting: Custom server builds and management
-    - Home Automation: Home Assistant, Mosquitto, Zigbee2MQTT
-
-    FEATURED PROJECTS:
-    1. Transcriptomatic - Speech-to-text evaluation platform with multiple AI model comparisons (Azure, Deepgram, ElevenLabs, local Whisper). Built with React frontend and FastAPI backend, containerized with Docker.
-    
-    2. DIY AI Server Build - Custom AI training server using Dell PowerEdge R730 and NVIDIA Tesla P100, documenting the journey of building self-hosted AI infrastructure.
-
-    PHILOSOPHY:
-    Believes in local, self-hosted AI solutions that give users control over their data while delivering enterprise-grade performance. Passionate about making AI accessible and practical for real-world applications.
-
-    CONTACT:
-    - LinkedIn: https://www.linkedin.com/in/robert-zeijlon-14015928b
-    - GitHub: https://github.com/RZeijlon
-    - Email: robert.zeijlon.92@gmail.com
-    - Phone: 072-233 16 26
-
-    Answer questions about Robert's background, skills, projects, and experience in a helpful and professional manner. Be conversational but informative.
-  `;
+  // Use Vite proxy in development, environment variable in production
+  const API_BASE_URL = import.meta.env.PROD ? (import.meta.env.VITE_API_URL || 'http://localhost:8000') : '';
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -93,7 +44,8 @@ const ChatBot = ({ onChatToggle, welcomeMessage }: ChatBotProps) => {
 
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
+      // Use fullscreen chat on screens smaller than 1024px to avoid layout issues
+      setIsMobile(window.innerWidth < 1024);
     };
     
     checkMobile();
@@ -176,34 +128,47 @@ const ChatBot = ({ onChatToggle, welcomeMessage }: ChatBotProps) => {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const messageToSend = inputMessage;
     setInputMessage('');
     setIsLoading(true);
 
     try {
-      const completion = await groq.chat.completions.create({
-        messages: [
-          { role: 'system', content: portfolioContext },
-          ...messages.map(msg => ({ role: msg.role, content: msg.content })),
-          { role: 'user', content: inputMessage }
-        ],
-        model: 'llama-3.3-70b-versatile',
-        temperature: 0.7,
-        max_tokens: 500
+      const response = await fetch(`${API_BASE_URL}/api/v1/chat/message`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: messageToSend,
+          conversation_id: conversationId || undefined,
+          use_rag: true // Enable RAG for intelligent responses
+        })
       });
+
+      if (!response.ok) {
+        throw new Error(`Backend request failed: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      // Update conversation ID if we got a new one
+      if (data.conversation_id && !conversationId) {
+        setConversationId(data.conversation_id);
+      }
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: completion.choices[0]?.message?.content || 'Sorry, I couldn\'t process that request.',
+        content: data.message || 'Sorry, I couldn\'t process that request.',
         role: 'assistant',
         timestamp: new Date()
       };
 
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
-      console.error('Error calling Groq API:', error);
+      console.error('Error calling backend API:', error);
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: 'Sorry, I\'m having trouble connecting right now. Please try again later.',
+        content: 'Sorry, I\'m having trouble connecting to the chat service right now. Please try again later.',
         role: 'assistant',
         timestamp: new Date()
       };
@@ -261,20 +226,9 @@ const ChatBot = ({ onChatToggle, welcomeMessage }: ChatBotProps) => {
     setIsTranscribing(true);
     
     try {
-      // Convert blob to file
-      const audioFile = new File([audioBlob], 'recording.webm', { type: 'audio/webm' });
-      
-      const transcription = await groq.audio.transcriptions.create({
-        file: audioFile,
-        model: 'whisper-large-v3-turbo',
-        response_format: 'text'
-      });
-
-      // Set the transcribed text in the input field
-      setInputMessage(String(transcription));
-      
-      // Optionally auto-send the message
-      // await sendMessage();
+      // TODO: Implement speech transcription via backend API
+      // This will be added when the backend transcription endpoint is ready
+      alert('Speech transcription will be available soon via the backend API!');
       
     } catch (error) {
       console.error('Error transcribing audio:', error);

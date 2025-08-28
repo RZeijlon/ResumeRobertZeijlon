@@ -5,9 +5,11 @@ Chat and RAG API endpoints
 from fastapi import APIRouter, HTTPException
 import uuid
 from datetime import datetime
+import os
 
 from app.models.chat import ChatRequest, ChatResponse
 from app.services.content_service import content_service
+from app.services.rag_service import rag_service
 from app.core.config import settings
 
 router = APIRouter()
@@ -16,19 +18,46 @@ router = APIRouter()
 @router.post("/message", response_model=ChatResponse)
 async def chat_message(request: ChatRequest):
     """
-    Process chat message (basic implementation without RAG for now)
+    Process chat message with RAG support
     """
     try:
         # Generate conversation ID if not provided
         conversation_id = request.conversation_id or str(uuid.uuid4())
         
-        # For now, return a simple response until RAG is implemented
-        response_text = generate_basic_response(request.message)
+        # Check if RAG is enabled and API keys are available
+        rag_enabled = (
+            request.use_rag and 
+            os.getenv("RAG_ENABLED", "false").lower() == "true" and
+            (os.getenv("GROQ_API_KEY") or os.getenv("OPENAI_API_KEY"))
+        )
+        
+        if rag_enabled:
+            try:
+                # Initialize RAG service if needed
+                await rag_service.initialize()
+                
+                # Use RAG for intelligent response
+                rag_result = await rag_service.chat(request.message)
+                
+                return ChatResponse(
+                    message=rag_result["response"],
+                    conversation_id=conversation_id,
+                    sources=rag_result.get("sources", []),
+                    timestamp=datetime.now()
+                )
+                
+            except Exception as e:
+                print(f"⚠️  RAG failed, falling back to basic response: {e}")
+                # Fall back to basic response if RAG fails
+                response_text = generate_basic_response(request.message)
+        else:
+            # Use basic keyword-based response
+            response_text = generate_basic_response(request.message)
         
         return ChatResponse(
             message=response_text,
             conversation_id=conversation_id,
-            sources=None if not request.use_rag else [],
+            sources=[],
             timestamp=datetime.now()
         )
     
@@ -52,6 +81,60 @@ async def clear_conversation_context(conversation_id: str):
         "conversation_id": conversation_id,
         "message": "Conversation context cleared"
     }
+
+
+@router.post("/initialize-rag")
+async def initialize_rag_system():
+    """Initialize the RAG system by processing all content and generating embeddings"""
+    try:
+        # Initialize the RAG service
+        await rag_service.initialize()
+        
+        # Process all content and generate embeddings
+        stats = await rag_service.process_content_directory(force_refresh=True)
+        
+        return {
+            "status": "success",
+            "message": "RAG system initialized successfully",
+            "stats": stats
+        }
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"RAG initialization failed: {str(e)}")
+
+
+@router.get("/rag-status")
+async def get_rag_status():
+    """Get the current status of the RAG system"""
+    try:
+        # Check if environment variables are set
+        groq_key = bool(os.getenv("GROQ_API_KEY"))
+        openai_key = bool(os.getenv("OPENAI_API_KEY"))
+        rag_enabled = os.getenv("RAG_ENABLED", "false").lower() == "true"
+        
+        # Count embeddings in database
+        await rag_service.initialize()
+        vector_store = rag_service.vector_store
+        
+        embedding_count = 0
+        if vector_store.connection_pool:
+            async with vector_store.connection_pool.acquire() as conn:
+                result = await conn.fetchrow("SELECT COUNT(*) as count FROM content_embeddings")
+                embedding_count = result["count"]
+        
+        return {
+            "rag_enabled": rag_enabled,
+            "groq_api_key": groq_key,
+            "openai_api_key": openai_key,
+            "embedding_count": embedding_count,
+            "status": "ready" if (rag_enabled and (groq_key or openai_key) and embedding_count > 0) else "not_ready"
+        }
+    
+    except Exception as e:
+        return {
+            "status": "error",
+            "error": str(e)
+        }
 
 
 def generate_basic_response(message: str) -> str:

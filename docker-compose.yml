@@ -35,9 +35,9 @@ services:
       - DEBUG=true
       - GROQ_API_KEY=${GROQ_API_KEY:-}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
-      - RAG_ENABLED=false
+      - RAG_ENABLED=true
     volumes:
-      - ./page_content:/app/page_content:ro
+      - ./frontend/public/page_content:/app/page_content:ro
       - ./backend/app:/app/app:ro
     ports:
       - "8000:8000"
@@ -59,7 +59,7 @@ services:
       - VITE_API_URL=http://localhost:8000
       - CHOKIDAR_USEPOLLING=true
     volumes:
-      - .:/app
+      - ./frontend:/app
       - node_modules:/app/node_modules
     ports:
       - "5173:5173"

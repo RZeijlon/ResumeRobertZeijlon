@@ -8,7 +8,11 @@ interface MatrixChar {
   speed: number;
 }
 
-const MatrixBackground = () => {
+interface MatrixBackgroundProps {
+  isDarkMode?: boolean;
+}
+
+const MatrixBackground = ({ isDarkMode = true }: MatrixBackgroundProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>(0);
   const charactersRef = useRef<MatrixChar[]>([]);
@@ -49,26 +53,43 @@ const MatrixBackground = () => {
     };
 
     const drawMatrix = () => {
-      // Create trailing effect with semi-transparent black overlay
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';  // Short trails
+      // Create trailing effect with theme-appropriate overlay
+      if (isDarkMode) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';  // Dark mode: black trails
+      } else {
+        ctx.fillStyle = 'rgba(226, 232, 240, 0.3)';  // Light mode: darker gray trails (slate-200)
+      }
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       ctx.font = `${fontSize}px monospace`;
       ctx.textAlign = 'start';
 
       charactersRef.current.forEach((char, index) => {
-        // Create gradient effect - brighter at the front of the "rain"
+        // Create gradient effect - different colors for light/dark themes
         const gradient = ctx.createLinearGradient(0, char.y - fontSize * 10, 0, char.y + fontSize);
-        gradient.addColorStop(0, 'rgba(0, 255, 0, 0)');
-        gradient.addColorStop(0.8, `rgba(0, 255, 0, ${char.alpha * 0.8})`);
-        gradient.addColorStop(1, `rgba(0, 255, 0, ${char.alpha})`);
+        
+        if (isDarkMode) {
+          // Dark theme: classic green matrix
+          gradient.addColorStop(0, 'rgba(0, 255, 0, 0)');
+          gradient.addColorStop(0.8, `rgba(0, 255, 0, ${char.alpha * 0.8})`);
+          gradient.addColorStop(1, `rgba(0, 255, 0, ${char.alpha})`);
+        } else {
+          // Light theme: soft green tones
+          gradient.addColorStop(0, 'rgba(34, 197, 94, 0)');  // green-500 transparent
+          gradient.addColorStop(0.8, `rgba(22, 163, 74, ${char.alpha * 0.7})`);  // green-600
+          gradient.addColorStop(1, `rgba(21, 128, 61, ${char.alpha * 0.85})`);  // green-700
+        }
         
         ctx.fillStyle = gradient;
         ctx.fillText(char.char, char.x, char.y);
 
-        // Add a bright white character at the leading edge occasionally
+        // Add a bright character at the leading edge occasionally
         if (Math.random() < 0.05) {
-          ctx.fillStyle = `rgba(255, 255, 255, ${char.alpha})`;
+          if (isDarkMode) {
+            ctx.fillStyle = `rgba(255, 255, 255, ${char.alpha})`;  // White in dark mode
+          } else {
+            ctx.fillStyle = `rgba(16, 185, 129, ${char.alpha * 0.95})`;  // Bright green-500 in light mode
+          }
           ctx.fillText(char.char, char.x, char.y);
         }
 
@@ -111,7 +132,7 @@ const MatrixBackground = () => {
       }
       window.removeEventListener('resize', handleResize);
     };
-  }, []);
+  }, [isDarkMode]);  // Re-run effect when theme changes
 
   return (
     <canvas
@@ -124,7 +145,7 @@ const MatrixBackground = () => {
         height: '100%',
         zIndex: -1,
         pointerEvents: 'none',
-        backgroundColor: '#000',
+        backgroundColor: isDarkMode ? '#000' : '#e2e8f0',  // Dark: black, Light: darker gray (slate-200)
       }}
     />
   );

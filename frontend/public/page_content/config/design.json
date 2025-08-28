@@ -1,0 +1,28 @@
+{
+  "spacing": {
+    "box_padding": "2rem",
+    "box_margin": "2rem",
+    "section_gap": "2rem",
+    "grid_gap": "1.5rem"
+  },
+  "typography": {
+    "font_family": {
+      "primary": "system-ui, -apple-system, sans-serif",
+      "monospace": "'Courier New', monospace"
+    },
+    "font_sizes": {
+      "hero_title": "clamp(1.2rem, 4.5vw, 1.8rem)",
+      "section_title": "clamp(1.1rem, 3.5vw, 1.6rem)",
+      "body": "1rem"
+    }
+  },
+  "borders": {
+    "radius": "8px",
+    "width": "1px",
+    "style": "solid"
+  },
+  "effects": {
+    "box_shadow": "none",
+    "transition_speed": "0.3s"
+  }
+}

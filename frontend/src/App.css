@@ -34,6 +34,7 @@
   transform: none !important;
 }
 
+
 /* Exception: Allow chat sliding transform in no-animation mode */
 .App.no-animation.chat-open main {
   transform: translateX(-190px) !important;
@@ -67,6 +68,37 @@
   border-radius: 4px;
   z-index: 1000;
   font-weight: bold;
+}
+
+/* Ensure all main box elements use consistent margins */
+.hero-title,
+.hero-text,
+.about-header,
+.about-intro,
+.projects-header,
+.contact-header,
+.contact-intro,
+.passion-statement {
+  margin-bottom: var(--box-margin) !important;
+}
+
+/* Grid elements should not have individual margins */
+.skill-category,
+.project-card,
+.contact-link {
+  margin: 0 !important;
+}
+
+/* Remove default margins that might interfere */
+.hero-title:last-child,
+.hero-text:last-child,
+.about-header:last-child,
+.about-intro:last-child,
+.projects-header:last-child,
+.contact-header:last-child,
+.contact-intro:last-child,
+.passion-statement:last-child {
+  margin-bottom: 0 !important;
 }
 
 .skip-link:focus {
@@ -159,11 +191,11 @@
 
 .accessibility-toggle:hover,
 .accessibility-toggle:focus {
-  background: white;
-  color: black;
-  outline: 2px solid var(--teal-light);
-  outline-offset: 2px;
-  transform: scale(1.1);
+  background: var(--lighter-background);
+  color: var(--background-contrast);
+  transform: scale(1.23);
+  outline: none;
+  border: none;
 }
 
 .App.high-visibility .accessibility-toggle:hover,
@@ -192,21 +224,35 @@
   border-radius: 12px;
   padding: 1rem;
   min-width: 200px;
-  box-shadow: 0 6px 25px rgba(32, 178, 170, 0.2);
+
   z-index: 100;
 }
 
 .accessibility-option {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0;
+  gap: 0.75rem;
+  padding: 0.75rem;
   cursor: pointer;
   font-size: var(--font-size-base);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  transition: border-color 0.2s ease;
+}
+
+.accessibility-option:hover {
+  border-color: var(--highlight);
 }
 
 .accessibility-option input {
   margin: 0;
+}
+
+/* Large checkboxes for accessibility */
+.large-checkbox {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
 }
 
 /* Enhanced focus indicators */
@@ -237,15 +283,26 @@ input:focus,
   container-type: size;
 }
 
-/* Black background when only animations are disabled */
-.App.no-animation:not(.high-visibility) {
+/* Dark theme background when only animations are disabled */
+.App.no-animation:not(.high-visibility):not(.light-mode) {
   background: black !important;
 }
 
-/* Ensure body and html also get black background in no-animation mode */
-body:has(.App.no-animation:not(.high-visibility)),
-html:has(.App.no-animation:not(.high-visibility)) {
+/* Light theme background when animations are disabled */
+.App.light-mode.no-animation {
+  background: #e2e8f0 !important;
+}
+
+/* Ensure body and html also get proper background in no-animation mode */
+body:has(.App.no-animation:not(.high-visibility):not(.light-mode)),
+html:has(.App.no-animation:not(.high-visibility):not(.light-mode)) {
   background: black !important;
+}
+
+/* Light mode no-animation background for body and html */
+body:has(.App.light-mode.no-animation),
+html:has(.App.light-mode.no-animation) {
+  background: #e2e8f0 !important;
 }
 
 .header {
@@ -256,12 +313,12 @@ html:has(.App.no-animation:not(.high-visibility)) {
   top: 0;
   z-index: 100;
   border-bottom: 2px solid var(--border-color);
-  box-shadow: 0 2px 10px rgba(32, 178, 170, 0.2);
+
 }
 
 .App.high-visibility .header {
   backdrop-filter: none;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+
 }
 
 /* High visibility mode overrides */
@@ -270,9 +327,9 @@ html:has(.App.no-animation:not(.high-visibility)) {
 }
 
 .App.high-visibility * {
-  text-shadow: none !important;
+
   backdrop-filter: none !important;
-  box-shadow: none !important;
+
 }
 
 /* High visibility project links */
@@ -299,6 +356,19 @@ html:has(.App.no-animation:not(.high-visibility)) {
 .App.high-visibility .mobile-nav {
   background: var(--background-primary) !important;
   border-color: var(--border-color) !important;
+}
+
+/* Fix accessibility menu hover in high visibility mode */
+.App.high-visibility .accessibility-option {
+  background: white !important;
+  color: black !important;
+  border: 2px solid transparent !important;
+}
+
+.App.high-visibility .accessibility-option:hover {
+  background: white !important;
+  border-color: black !important;
+  color: black !important;
 }
 
 .App.high-visibility .chat-nav-button {
@@ -367,15 +437,15 @@ html:has(.App.high-visibility) {
   height: 80px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid var(--teal);
-  box-shadow: 0 4px 12px rgba(32, 178, 170, 0.3);
+  border: 3px solid var(--frames);
+
 }
 
 .nav h1 {
   margin: 0;
-  color: var(--seaweed-green);
+  color: var(--highlight);
   font-size: 1.5rem;
-  text-shadow: 0 0 10px rgba(46, 139, 69, 0.3);
+
 }
 
 .nav ul {
@@ -400,16 +470,19 @@ html:has(.App.high-visibility) {
   text-decoration: none;
   font-weight: 500;
   font-size: var(--font-size-base);
-  transition: color 0.3s;
+  transition: border-color 0.3s;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0.5rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 4px;
 }
 
 .nav a:hover {
-  color: var(--seaweed-green);
-  text-shadow: 0 0 8px rgba(46, 139, 69, 0.4);
+  border-color: var(--frames);
+  background: transparent;
+  color: var(--text-primary);
 }
 
 /* Chat button in navigation */
@@ -426,8 +499,7 @@ html:has(.App.high-visibility) {
 }
 
 .chat-nav-button:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(32, 178, 170, 0.4);
+  transform: scale(1.23);
 }
 
 /* Mobile menu toggle */
@@ -474,7 +546,7 @@ html:has(.App.high-visibility) {
   border-radius: 12px;
   padding: 1rem;
   min-width: 200px;
-  box-shadow: 0 6px 25px rgba(32, 178, 170, 0.2);
+
   z-index: 1000;
   flex-direction: column;
   gap: 0.5rem;
@@ -599,54 +671,48 @@ main {
 
 .hero {
   text-align: center;
-  padding: 2.5rem 0;
-  margin: 1.5rem 0;
+  padding: 0;
+  margin: var(--box-margin) 0;
 }
 
 .hero-title {
   background: var(--background-primary);
   border-radius: 16px;
-  padding: 2rem 1.5rem;
+  padding: var(--box-padding);
   border: 2px solid var(--border-color);
   backdrop-filter: blur(15px);
-  box-shadow: 0 6px 25px rgba(32, 178, 170, 0.2);
-  margin-bottom: 2rem;
+
+  margin-bottom: var(--box-margin);
   transition: all 0.3s ease;
   cursor: default;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  hyphens: auto;
 }
 
-.hero-title:hover {
-  transform: translateY(-3px);
-  background: rgba(46, 139, 69, 0.15);
-  box-shadow: 0 8px 30px rgba(32, 178, 170, 0.25);
-  border-color: var(--teal-light);
-}
 
-.hero-title h2 {
-  font-size: 1.8rem;
+.hero-title h1, .hero-title h2 {
+  font-size: clamp(1.2rem, 4.5vw, 1.8rem);
   margin: 0;
   line-height: 1.2;
-  color: var(--seaweed-green);
-  text-shadow: 0 0 15px rgba(46, 139, 69, 0.4);
+  color: var(--highlight);
+
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .hero-text {
   background: var(--background-primary);
   border-radius: 16px;
-  padding: 1.5rem;
+  padding: var(--box-padding);
   border: 2px solid var(--border-color);
   backdrop-filter: blur(15px);
-  box-shadow: 0 6px 25px rgba(32, 178, 170, 0.2);
+
+  margin-bottom: var(--box-margin);
   transition: all 0.3s ease;
   cursor: default;
 }
 
-.hero-text:hover {
-  transform: translateY(-2px);
-  background: rgba(46, 139, 69, 0.12);
-  box-shadow: 0 8px 30px rgba(32, 178, 170, 0.25);
-  border-color: var(--teal-light);
-}
 
 .hero-text p {
   margin: 0;
@@ -656,56 +722,49 @@ main {
 
 
 .about, .projects, .contact {
-  padding: 2.5rem 0;
-  margin: 2rem 0;
+  padding: 0;
+  margin: var(--box-margin) 0;
 }
 
 .about-header, .projects-header {
   background: var(--background-primary);
   border-radius: 16px;
-  padding: 2rem 1.5rem;
+  padding: var(--box-padding);
   border: 2px solid var(--border-color);
   backdrop-filter: blur(15px);
-  box-shadow: 0 6px 25px rgba(32, 178, 170, 0.2);
-  margin-bottom: 2rem;
+
+  margin-bottom: var(--box-margin);
   text-align: center;
   transition: all 0.3s ease;
   cursor: default;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  hyphens: auto;
 }
 
-.about-header:hover, .projects-header:hover {
-  transform: translateY(-3px);
-  background: rgba(46, 139, 69, 0.15);
-  box-shadow: 0 8px 30px rgba(32, 178, 170, 0.25);
-  border-color: var(--teal-light);
-}
 
 .about-header h2, .projects-header h2, .contact-header h2 {
-  font-size: 1.8rem;
+  font-size: clamp(1.2rem, 4.5vw, 1.8rem);
   margin: 0;
-  color: var(--seaweed-green);
-  text-shadow: 0 0 12px rgba(46, 139, 69, 0.3);
+  color: var(--highlight);
+
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .about-intro {
   background: var(--background-primary);
   border-radius: 16px;
-  padding: 1.5rem;
+  padding: var(--box-padding);
   border: 2px solid var(--border-color);
   backdrop-filter: blur(15px);
-  box-shadow: 0 6px 25px rgba(32, 178, 170, 0.2);
-  margin-bottom: 2rem;
+
+  margin-bottom: var(--box-margin);
   text-align: center;
   transition: all 0.3s ease;
   cursor: default;
 }
 
-.about-intro:hover {
-  transform: translateY(-2px);
-  background: rgba(46, 139, 69, 0.12);
-  box-shadow: 0 8px 30px rgba(32, 178, 170, 0.25);
-  border-color: var(--teal-light);
-}
 
 .about-intro p {
   font-size: 0.95rem;
@@ -722,33 +781,27 @@ main {
 .skills-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1.5rem;
-  margin: 2.5rem 0;
+  gap: var(--box-margin);
+  margin: var(--box-margin) 0;
   max-width: 100%;
 }
 
 .skill-category {
   background: var(--background-primary);
-  padding: 2rem 1.5rem;
+  padding: var(--box-padding);
   border-radius: 16px;
   border: 2px solid var(--border-color);
   backdrop-filter: blur(15px);
-  box-shadow: 0 6px 25px rgba(32, 178, 170, 0.15);
+
   transition: all 0.3s ease;
 }
 
-.skill-category:hover {
-  transform: translateY(-2px);
-  background: rgba(46, 139, 69, 0.12);
-  box-shadow: 0 8px 30px rgba(32, 178, 170, 0.25);
-  border-color: var(--teal-light);
-}
 
 .skill-category h3 {
-  color: var(--seaweed-green);
+  color: var(--highlight);
   margin: 0 0 1rem 0;
   font-size: 1.1rem;
-  text-shadow: 0 0 8px rgba(46, 139, 69, 0.3);
+
 }
 
 .skill-category ul {
@@ -766,63 +819,51 @@ main {
 
 .skill-category li::before {
   content: "▸ ";
-  color: var(--seaweed-green);
+  color: var(--frames);
   font-weight: bold;
 }
 
 .passion-statement {
   background: var(--background-primary);
   color: var(--text-primary);
-  padding: 1.5rem;
+  padding: var(--box-padding);
   border-radius: 16px;
   border: 2px solid var(--border-color);
   text-align: center;
-  margin-top: 2rem;
+  margin-top: var(--box-margin);
   font-size: var(--font-size-base);
   line-height: 1.5;
   backdrop-filter: blur(15px);
-  box-shadow: 0 6px 25px rgba(32, 178, 170, 0.2);
+
   transition: all 0.3s ease;
   cursor: default;
 }
 
-.passion-statement:hover {
-  transform: translateY(-2px);
-  background: rgba(46, 139, 69, 0.12);
-  box-shadow: 0 8px 30px rgba(32, 178, 170, 0.25);
-  border-color: var(--teal-light);
-}
 
 .project-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 1.5rem;
-  margin-top: 1.5rem;
+  margin-top: var(--box-margin);
   max-width: 100%;
 }
 
 .project-card {
   background: var(--background-primary);
-  padding: 1.5rem;
+  padding: var(--box-padding);
   border-radius: 12px;
   border: 2px solid var(--border-color);
   backdrop-filter: blur(10px);
-  box-shadow: 0 4px 20px rgba(32, 178, 170, 0.15);
+
   transition: all 0.3s ease;
 }
 
-.project-card:hover {
-  transform: translateY(-4px);
-  background: rgba(46, 139, 69, 0.12);
-  box-shadow: 0 8px 30px rgba(32, 178, 170, 0.25);
-  border-color: var(--teal-light);
-}
 
 .project-card h3 {
-  color: var(--seaweed-green);
-  margin-bottom: 0.75rem;
+  color: var(--highlight);
+  margin-bottom: var(--box-margin);
   font-size: 1.2rem;
-  text-shadow: 0 0 8px rgba(46, 139, 69, 0.3);
+
 }
 
 .project-card p {
@@ -831,20 +872,14 @@ main {
 }
 
 .project-card.featured {
-  background: rgba(45, 52, 45, 0.9);
-  border: 2px solid var(--teal);
-  box-shadow: 0 6px 25px rgba(32, 178, 170, 0.2);
+  background: var(--background-primary);
+  border: 2px solid var(--frames);
+
 }
 
-.project-card.featured:hover {
-  transform: translateY(-4px);
-  background: rgba(46, 139, 69, 0.15);
-  box-shadow: 0 10px 35px rgba(32, 178, 170, 0.3);
-  border-color: var(--teal-light);
-}
 
 .project-image {
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--box-margin);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -857,15 +892,15 @@ main {
 }
 
 .project-tech {
-  color: var(--teal-light);
+  color: var(--highlight);
   font-weight: 600;
   font-size: 0.9rem;
-  margin-bottom: 1rem;
-  text-shadow: 0 0 8px rgba(72, 209, 204, 0.3);
+  margin-bottom: var(--box-margin);
+
 }
 
 .project-description {
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--box-margin);
   line-height: 1.6;
 }
 
@@ -873,13 +908,13 @@ main {
   color: var(--seaweed-green);
   margin-bottom: 0.5rem;
   font-size: 1rem;
-  text-shadow: 0 0 8px rgba(46, 139, 69, 0.3);
+
 }
 
 .project-highlights ul {
   list-style: none;
   padding: 0;
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--box-margin);
 }
 
 .project-highlights li {
@@ -889,44 +924,46 @@ main {
 }
 
 .project-links a {
-  display: inline-block;
-  background: var(--seaweed-green);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  background: var(--background-contrast);
   color: var(--text-primary);
-  padding: 0.75rem 1.5rem;
-  border-radius: 5px;
+  border: 2px solid var(--frames);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
   text-decoration: none;
+  font-size: var(--font-size-small);
   font-weight: 500;
-  transition: background 0.3s;
+  transition: background var(--transition-fast);
 }
 
 .project-links a:hover {
-  background: var(--teal);
+  background: var(--frames);
+  color: var(--darker-background);
 }
 
 .contact {
   text-align: center;
-  padding: 2.5rem 0;
-  margin: 2rem 0;
+  padding: 0;
+  margin: var(--box-margin) 0;
 }
 
 .contact-header {
   background: var(--background-primary);
   border-radius: 16px;
-  padding: 2rem 1.5rem;
+  padding: var(--box-padding);
   border: 2px solid var(--border-color);
   backdrop-filter: blur(15px);
-  box-shadow: 0 6px 25px rgba(32, 178, 170, 0.2);
-  margin-bottom: 2rem;
+
+  margin-bottom: var(--box-margin);
   transition: all 0.3s ease;
   cursor: default;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  hyphens: auto;
 }
 
-.contact-header:hover {
-  transform: translateY(-3px);
-  background: rgba(46, 139, 69, 0.15);
-  box-shadow: 0 8px 30px rgba(32, 178, 170, 0.25);
-  border-color: var(--teal-light);
-}
 
 .contact-header h2 {
   margin: 0;
@@ -935,21 +972,15 @@ main {
 .contact-intro {
   background: var(--background-primary);
   border-radius: 16px;
-  padding: 1.5rem;
+  padding: var(--box-padding);
   border: 2px solid var(--border-color);
   backdrop-filter: blur(15px);
-  box-shadow: 0 6px 25px rgba(32, 178, 170, 0.2);
-  margin-bottom: 2rem;
+
+  margin-bottom: var(--box-margin);
   transition: all 0.3s ease;
   cursor: default;
 }
 
-.contact-intro:hover {
-  transform: translateY(-2px);
-  background: rgba(46, 139, 69, 0.12);
-  box-shadow: 0 8px 30px rgba(32, 178, 170, 0.25);
-  border-color: var(--teal-light);
-}
 
 .contact-intro p {
   margin: 0;
@@ -970,7 +1001,7 @@ main {
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1rem 1.5rem;
+  padding: var(--box-padding);
   background: var(--background-secondary);
   border-radius: 10px;
   text-decoration: none;
@@ -981,15 +1012,15 @@ main {
 }
 
 .contact-link:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(32, 178, 170, 0.3);
-  background: rgba(46, 139, 69, 0.12);
+  background: transparent;
+  color: var(--highlight);
+  border-color: var(--highlight);
 }
 
 
 .contact-icon {
   font-size: 1.5rem;
-  color: var(--seaweed-green);
+  color: var(--highlight);
   min-width: 24px;
   filter: drop-shadow(0 0 8px rgba(46, 139, 69, 0.3));
 }
@@ -1021,25 +1052,26 @@ main {
   }
 
   .nav a:hover {
-    background: rgba(46, 139, 69, 0.1);
-    backdrop-filter: blur(10px);
+    border-color: var(--frames);
+    background: transparent;
+    color: var(--text-primary);
   }
 
   .hero {
-    padding: 3rem 0;
-    margin: 2.5rem 0;
+    padding: 0;
+    margin: var(--box-margin) 0;
   }
 
   .hero-title {
-    padding: 2.5rem;
+    padding: var(--box-padding);
   }
 
-  .hero-title h2 {
-    font-size: 2.8rem;
+  .hero-title h1, .hero-title h2 {
+    font-size: clamp(1.8rem, 5vw, 2.8rem);
   }
 
   .hero-text {
-    padding: 2rem;
+    padding: var(--box-padding);
   }
 
   .hero-text p {
@@ -1049,15 +1081,15 @@ main {
   }
 
   .about-header, .projects-header {
-    padding: 2.5rem;
+    padding: var(--box-padding);
   }
 
   .about-header h2, .projects-header h2, .contact-header h2 {
-    font-size: 2.5rem;
+    font-size: clamp(1.6rem, 4.8vw, 2.5rem);
   }
 
   .about-intro {
-    padding: 2rem;
+    padding: var(--box-padding);
   }
 
   .project-grid {
@@ -1066,19 +1098,19 @@ main {
   }
 
   .project-card {
-    padding: 2.5rem;
+    padding: var(--box-padding);
   }
 
   .contact {
-    padding: 3rem 0;
+    padding: 0;
   }
 
   .contact-header {
-    padding: 2.5rem;
+    padding: var(--box-padding);
   }
 
   .contact-intro {
-    padding: 2rem;
+    padding: var(--box-padding);
   }
 
   .contact-links {
@@ -1088,11 +1120,11 @@ main {
 
   .skills-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 2rem;
+    gap: var(--box-margin);
   }
 
   .skill-category {
-    padding: 2.5rem;
+    padding: var(--box-padding);
   }
 }
 
@@ -1105,20 +1137,20 @@ main {
   }
 
   .hero {
-    padding: 4rem 0;
-    margin: 3rem 0;
+    padding: 0;
+    margin: var(--box-margin) 0;
   }
 
   .hero-title {
-    padding: 3rem;
+    padding: var(--box-padding);
   }
 
-  .hero-title h2 {
-    font-size: 3.5rem;
+  .hero-title h1, .hero-title h2 {
+    font-size: clamp(2rem, 5.5vw, 3.5rem);
   }
 
   .hero-text {
-    padding: 2.5rem;
+    padding: var(--box-padding);
   }
 
   .hero-text p {
@@ -1128,25 +1160,25 @@ main {
   }
 
   .about, .projects, .contact {
-    padding: 4rem 0;
-    margin: 3rem 0;
+    padding: 0;
+    margin: var(--box-margin) 0;
   }
 
   .about-header, .projects-header {
-    padding: 3rem;
+    padding: var(--box-padding);
   }
 
   .about-header h2, .projects-header h2, .contact-header h2 {
-    font-size: 3rem;
+    font-size: clamp(1.8rem, 5.2vw, 3rem);
   }
 
   .about-intro {
-    padding: 2.5rem;
+    padding: var(--box-padding);
   }
 
   .skills-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 2.5rem;
+    gap: var(--box-margin);
   }
 
   .project-grid {
@@ -1155,19 +1187,19 @@ main {
   }
 
   .project-card {
-    padding: 3rem;
+    padding: var(--box-padding);
   }
 
   .contact {
-    padding: 4rem 0;
+    padding: 0;
   }
 
   .contact-header {
-    padding: 3rem;
+    padding: var(--box-padding);
   }
 
   .contact-intro {
-    padding: 2.5rem;
+    padding: var(--box-padding);
   }
 
   .contact-links {
@@ -1176,7 +1208,7 @@ main {
   }
 
   .contact-link {
-    padding: 1.5rem 2rem;
+    padding: var(--box-padding);
   }
 }
 

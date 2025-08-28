@@ -5,7 +5,7 @@
 
 .theme-toggle-button {
   background: var(--lighter-background);
-  border: 2px solid var(--frames);
+  border: 2px solid var(--background-contrast);
   color: var(--text-primary);
   padding: var(--spacing-xs);
   border-radius: var(--border-radius-sm);
@@ -21,8 +21,7 @@
 }
 
 .theme-toggle-button:hover {
-  background: var(--frames);
-  color: var(--darker-background);
+  border-color: var(--frames);
 }
 
 .theme-dropdown {
@@ -35,7 +34,7 @@
   padding: var(--spacing-sm);
   z-index: 1000;
   min-width: 200px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+
 }
 
 .theme-option {
@@ -131,13 +130,13 @@
   z-index: 1000;
   min-width: 280px;
   max-width: 320px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+
 }
 
 .accessibility-header h4 {
   color: var(--highlight);
   margin-bottom: var(--spacing-md);
-  font-size: var(--font-size-base);
+  font-size: 1.2rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -148,12 +147,13 @@
   cursor: pointer;
   padding: var(--spacing-sm);
   border-radius: var(--border-radius-sm);
-  transition: background var(--transition-fast);
+  border: 1px solid transparent;
+  transition: border-color var(--transition-fast);
+  font-size: 1.2rem;
 }
 
 .accessibility-option:hover {
-  background: var(--frames);
-  color: var(--darker-background);
+  border-color: var(--frames) !important;
 }
 
 .accessibility-option input[type="checkbox"] {
@@ -165,11 +165,12 @@
   font-weight: 500;
   display: block;
   margin-bottom: var(--spacing-xs);
+  font-size: 1.2rem;
 }
 
 .option-description {
   color: var(--text-secondary);
-  font-size: var(--font-size-small);
+  font-size: 1.2rem;
   display: block;
   margin-left: calc(var(--spacing-sm) + 16px); /* Offset for checkbox */
 }
@@ -210,7 +211,7 @@
 
 .theme-switcher-mobile .theme-dropdown {
   position: static;
-  box-shadow: none;
+
   border: none;
   background: transparent;
   padding: var(--spacing-sm) 0 0 var(--spacing-md);
@@ -254,26 +255,12 @@
   overflow: hidden;
 }
 
-.project-card:hover {
-  border-color: var(--highlight);
-  transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgba(32, 178, 170, 0.2);
-}
 
 .project-card.featured {
   border-color: var(--highlight);
   position: relative;
 }
 
-.project-card.featured::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--highlight), var(--frames));
-}
 
 .project-image {
   margin: calc(-1 * var(--spacing-lg)) calc(-1 * var(--spacing-lg)) var(--spacing-md);
@@ -289,7 +276,7 @@
 }
 
 .project-tech {
-  color: var(--frames) !important;
+  color: var(--highlight) !important;
   font-size: var(--font-size-small);
   margin: var(--spacing-sm) 0;
   font-weight: 500;
@@ -297,14 +284,17 @@
 
 .project-links {
   margin-top: var(--spacing-md);
+  display: flex;
+  justify-content: center;
 }
 
 .project-links a {
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-xs);
-  background: var(--highlight);
-  color: var(--darker-background);
+  background: var(--lighter-background);
+  color: var(--text-primary);
+  border: 2px solid var(--frames);
   padding: var(--spacing-xs) var(--spacing-sm);
   border-radius: var(--border-radius-sm);
   text-decoration: none;
@@ -315,6 +305,7 @@
 
 .project-links a:hover {
   background: var(--frames);
+  color: var(--darker-background);
 }
 
 /* Skills Grid Styles */
@@ -326,10 +317,6 @@
   transition: all var(--transition-normal);
 }
 
-.skills-grid.dynamic-width .skill-category:hover {
-  border-color: var(--highlight);
-  transform: translateY(-2px);
-}
 
 /* Contact Section Styles */
 .contact-links {
@@ -348,20 +335,22 @@
 .contact-link {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--spacing-md);
   background: var(--lighter-background);
-  border: 2px solid var(--frames);
+  border: 3px solid var(--frames);
   color: var(--text-primary);
   padding: var(--spacing-md);
   border-radius: var(--border-radius-md);
   text-decoration: none;
   transition: all var(--transition-normal);
+  box-sizing: border-box;
 }
 
 .contact-link:hover {
+  background: transparent;
+  color: var(--highlight);
   border-color: var(--highlight);
-  background: var(--frames);
-  transform: translateY(-2px);
 }
 
 .contact-icon {

@@ -9,7 +9,7 @@
     "chatBot": {
       "enabled": true,
       "welcomeFile": "components/welcome-chat.md",
-      "ragEnabled": false
+      "ragEnabled": true
     },
     "accessibility": {
       "highVisibilityMode": true,

@@ -43,6 +43,7 @@ export interface ThemeConfig {
       frames: string
       'lighter-background': string
       'darker-background': string
+      'background-contrast': string
     }
     effects: {
       matrixBackground: boolean
@@ -72,6 +73,35 @@ export interface LayoutConfig {
   }
 }
 
+export interface DesignConfig {
+  spacing: {
+    box_padding: string
+    box_margin: string
+    section_gap: string
+    grid_gap: string
+  }
+  typography: {
+    font_family: {
+      primary: string
+      monospace: string
+    }
+    font_sizes: {
+      hero_title: string
+      section_title: string
+      body: string
+    }
+  }
+  borders: {
+    radius: string
+    width: string
+    style: string
+  }
+  effects: {
+    box_shadow: string
+    transition_speed: string
+  }
+}
+
 export interface PersonalInfo {
   name: string
   title: string
@@ -92,6 +122,7 @@ export const useContentManager = () => {
   const [siteConfig, setSiteConfig] = useState<SiteConfig | null>(null)
   const [themeConfig, setThemeConfig] = useState<ThemeConfig | null>(null)
   const [layoutConfig, setLayoutConfig] = useState<LayoutConfig | null>(null)
+  const [designConfig, setDesignConfig] = useState<DesignConfig | null>(null)
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo | null>(null)
   const [content, setContent] = useState<Record<string, ContentItem>>({})
   const [loading, setLoading] = useState(true)
@@ -143,16 +174,19 @@ export const useContentManager = () => {
         setError(null)
 
         // Load configuration files
-        const [site, theme, layout, personal] = await Promise.all([
+        const [site, theme, layout, design, personal] = await Promise.all([
           loadJsonFile('/page_content/config/site.json'),
           loadJsonFile('/page_content/config/theme.json'),
           loadJsonFile('/page_content/config/layout.json'),
+          loadJsonFile('/page_content/config/design.json'),
           loadJsonFile('/page_content/personal/contact-info.json')
         ])
+
 
         setSiteConfig(site)
         setThemeConfig(theme)
         setLayoutConfig(layout)
+        setDesignConfig(design)
         setPersonalInfo(personal)
 
         // Load all content files based on layout configuration
@@ -224,6 +258,7 @@ export const useContentManager = () => {
     siteConfig,
     themeConfig,
     layoutConfig,
+    designConfig,
     personalInfo,
     content,
     loading,

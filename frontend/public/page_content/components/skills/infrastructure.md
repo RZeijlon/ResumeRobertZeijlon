@@ -4,7 +4,7 @@ title: "Infrastructure & DevOps"
 order: 3
 ---
 
-## Infrastructure & DevOps
+## **Infrastructure & DevOps**
 
 - **Kubernetes**: k3s 3-node HA cluster deployment
 - **Linux Distributions**: Arch, Fedora, NixOS, Debian, Ubuntu

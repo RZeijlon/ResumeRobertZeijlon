@@ -3,10 +3,11 @@
     "default-dark": {
       "name": "Matrix Dark",
       "colors": {
-        "highlight": "#20b2aa",
-        "frames": "#2e8b45",
+        "highlight": "#2e8b45",
+        "frames": "#eb4034",
         "lighter-background": "#2d342d",
-        "darker-background": "#1a1f1a"
+        "darker-background": "#1a1f1a",
+        "background-contrast": "#666666"
       },
       "effects": {
         "matrixBackground": true,
@@ -14,15 +15,16 @@
       }
     },
     "default-light": {
-      "name": "Clean Light",
+      "name": "Matrix Light",
       "colors": {
-        "highlight": "#2e8b45",
-        "frames": "#20b2aa",
+        "highlight": "#20b2aa",
+        "frames": "#eb4034",
         "lighter-background": "#f8f9fa",
-        "darker-background": "#ffffff"
+        "darker-background": "#ffffff",
+        "background-contrast": "#333333"
       },
       "effects": {
-        "matrixBackground": false,
+        "matrixBackground": true,
         "animations": true
       }
     },
@@ -32,7 +34,8 @@
         "highlight": "#000000",
         "frames": "#000000",
         "lighter-background": "#ffffff",
-        "darker-background": "#ffffff"
+        "darker-background": "#ffffff",
+        "background-contrast": "#000000"
       },
       "effects": {
         "matrixBackground": false,

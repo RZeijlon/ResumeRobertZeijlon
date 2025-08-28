@@ -24,7 +24,7 @@
           "components/skills/infrastructure.md",
           "components/skills/specializations.md"
         ],
-        "width": "dynamic",
+        "width": "full",
         "navbar": false
       },
       {

@@ -8,7 +8,7 @@ image: "/images/transcriptomatic-comparison.png"
 order: 1
 ---
 
-## 🎙️ Transcriptomatic
+## 🎙️ **Transcriptomatic**
 
 **Tech Stack:** Python • FastAPI • React • Docker • AI/ML
 

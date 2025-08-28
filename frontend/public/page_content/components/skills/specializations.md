@@ -4,7 +4,7 @@ title: "Specializations"
 order: 4
 ---
 
-## Specializations
+## **Specializations**
 
 - Local AI model deployment and optimization
 - High-availability Kubernetes cluster management

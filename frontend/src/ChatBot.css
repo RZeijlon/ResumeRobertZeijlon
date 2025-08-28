@@ -6,7 +6,7 @@
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--teal), var(--seaweed-green));
+  background: linear-gradient(135deg, var(--highlight), var(--frames));
   color: white;
   border: none;
   padding: 0;
@@ -15,7 +15,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+
   transition: all 0.3s ease;
   z-index: 1000;
 }
@@ -26,12 +26,12 @@
 }
 
 .chat-toggle:hover {
-  transform: scale(1.1);
-  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+  transform: scale(1.23);
+
 }
 
 .chat-toggle.open {
-  background: linear-gradient(135deg, #dc3545, #c82333);
+  background: var(--background-contrast);
 }
 
 /* Chat Window */
@@ -41,12 +41,12 @@
   right: 24px;
   width: 380px;
   height: 500px;
-  background: #2d342d;
-  border: 2px solid var(--border-color);
+  background: var(--background-primary);
+  border: 2px solid var(--background-contrast);
   border-radius: 12px;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+
   z-index: 999;
   overflow: hidden;
 }
@@ -71,7 +71,7 @@
 
 /* Chat Header */
 .chat-header {
-  background: linear-gradient(135deg, var(--teal), var(--seaweed-green));
+  background: linear-gradient(135deg, var(--highlight), var(--frames));
   color: white;
   padding: 16px;
   display: flex;
@@ -109,7 +109,7 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  background: #243324;
+  background: var(--background-secondary);
 }
 
 .message {
@@ -143,7 +143,7 @@
 .message.assistant .message-content {
   background: var(--background-primary);
   color: var(--text-primary);
-  border: 1px solid rgba(46, 139, 69, 0.3);
+  border: 1px solid var(--frames);
 }
 
 .message-time {
@@ -195,15 +195,16 @@
 .chat-input {
   display: flex;
   padding: 16px;
+  padding-right: 32px; /* Extra padding to account for potential scrollbar */
   gap: 8px;
   background: var(--background-primary);
-  border-top: 1px solid rgba(46, 139, 69, 0.3);
+  border-top: 1px solid var(--frames);
   align-items: center;
 }
 
 /* Mobile close button in input area */
 .chat-close-mobile {
-  background: rgba(220, 53, 69, 0.8);
+  background: var(--background-contrast);
   color: white;
   border: none;
   border-radius: 50%;
@@ -220,7 +221,7 @@
 }
 
 .chat-close-mobile:hover {
-  background: rgba(220, 53, 69, 1);
+  background: var(--highlight);
 }
 
 /* High visibility mode for mobile close button */
@@ -238,6 +239,7 @@
 /* High visibility mode mobile input sizing */
 .App.high-visibility .chat-window.mobile .chat-input {
   padding: 12px;
+  padding-right: 28px; /* Extra padding to account for potential scrollbar */
   padding-bottom: max(12px, calc(12px + env(safe-area-inset-bottom)));
   box-sizing: border-box;
   width: 100%;
@@ -247,6 +249,7 @@
 
 .App.high-visibility .chat-window.mobile.keyboard-open .chat-input {
   padding: 12px;
+  padding-right: 28px; /* Extra padding to account for potential scrollbar */
   padding-bottom: max(12px, calc(12px + env(safe-area-inset-bottom)));
   box-sizing: border-box;
   width: 100%;
@@ -296,7 +299,7 @@
   position: sticky;
   bottom: 0;
   background: var(--background-primary);
-  border-top: 1px solid rgba(46, 139, 69, 0.3);
+  border-top: 1px solid var(--frames);
   padding: 16px;
   margin-bottom: max(env(safe-area-inset-bottom, 0px), 20px);
 }
@@ -304,9 +307,10 @@
 /* Mobile input - default positioning with safe area */
 .chat-window.mobile .chat-input {
   padding: 12px;
+  padding-right: 28px; /* Extra padding to account for potential scrollbar */
   padding-bottom: max(12px, calc(12px + env(safe-area-inset-bottom)));
   background: var(--background-primary);
-  border-top: 1px solid rgba(46, 139, 69, 0.3);
+  border-top: 1px solid var(--frames);
   box-sizing: border-box;
   width: 100%;
   max-width: 100vw;
@@ -316,9 +320,10 @@
 /* Mobile input when keyboard is open */
 .chat-window.mobile.keyboard-open .chat-input {
   padding: 12px;
+  padding-right: 28px; /* Extra padding to account for potential scrollbar */
   padding-bottom: max(12px, calc(12px + env(safe-area-inset-bottom)));
   background: var(--background-primary);
-  border-top: 1px solid rgba(46, 139, 69, 0.3);
+  border-top: 1px solid var(--frames);
   flex-shrink: 0;
   box-sizing: border-box;
   width: 100%;
@@ -330,10 +335,10 @@
   flex: 1;
   min-width: 0; /* Allow flex item to shrink below content size */
   padding: 10px 14px;
-  border: 1px solid rgba(46, 139, 69, 0.3);
+  border: 1px solid var(--frames);
   border-radius: 20px;
-  background: #1a1f1a;
-  color: var(--text-primary);
+  background: white;
+  color: #000000;
   font-size: 0.9rem;
   outline: none;
   transition: border-color 0.2s ease;
@@ -345,12 +350,12 @@
 }
 
 .chat-input input::placeholder {
-  color: var(--text-secondary);
+  color: #666666;
 }
 
 .chat-input button {
   padding: 10px 12px;
-  background: linear-gradient(135deg, var(--teal), var(--seaweed-green));
+  background: linear-gradient(135deg, var(--highlight), var(--frames));
   color: white;
   border: none;
   border-radius: 20px;
@@ -379,26 +384,26 @@
   min-width: 40px;
   width: 40px;
   height: 40px;
-  background: linear-gradient(135deg, #6a4c93, #8b5aa0) !important;
+  background: var(--frames) !important;
 }
 
 .voice-button.recording {
-  background: linear-gradient(135deg, #e63946, #dc2626) !important;
+  background: var(--highlight) !important;
   animation: pulse 1.5s infinite;
 }
 
 @keyframes pulse {
   0% {
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(230, 57, 70, 0.7);
+
   }
   70% {
     transform: scale(1.05);
-    box-shadow: 0 0 0 10px rgba(230, 57, 70, 0);
+
   }
   100% {
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(230, 57, 70, 0);
+
   }
 }
 
@@ -475,12 +480,12 @@
 .App.high-visibility .chat-toggle {
   background: var(--background-primary);
   color: var(--text-primary);
-  border: 2px solid var(--border-color);
+  border: 2px solid var(--frames);
 }
 
 .App.high-visibility .chat-window {
   background: var(--background-primary);
-  border: 3px solid var(--border-color);
+  border: 3px solid var(--frames);
 }
 
 .App.high-visibility .chat-messages {
@@ -489,16 +494,16 @@
 
 .App.high-visibility .chat-input input {
   background: var(--background-secondary);
-  border: 2px solid var(--border-color);
+  border: 2px solid var(--frames);
 }
 
 .App.high-visibility .chat-input {
-  border-top: 2px solid var(--border-color);
+  border-top: 2px solid var(--frames);
 }
 
 .App.high-visibility .message.assistant .message-content {
   background: var(--background-secondary);
-  border: 2px solid var(--border-color);
+  border: 2px solid var(--frames);
 }
 
 .App.high-visibility .chat-header {
@@ -513,13 +518,13 @@
 .App.high-visibility .message.user .message-content {
   background: var(--background-secondary);
   color: var(--text-primary);
-  border: 2px solid var(--border-color);
+  border: 2px solid var(--frames);
 }
 
 .App.high-visibility .chat-input button {
   background: var(--background-secondary);
   color: var(--text-primary);
-  border: 2px solid var(--border-color);
+  border: 2px solid var(--frames);
 }
 
 .App.high-visibility .voice-button {
@@ -577,6 +582,7 @@
 /* No animation mode mobile input sizing */
 .App.no-animation .chat-window.mobile .chat-input {
   padding: 12px;
+  padding-right: 28px; /* Extra padding to account for potential scrollbar */
   padding-bottom: max(12px, calc(12px + env(safe-area-inset-bottom)));
   box-sizing: border-box;
   width: 100%;
@@ -586,6 +592,7 @@
 
 .App.no-animation .chat-window.mobile.keyboard-open .chat-input {
   padding: 12px;
+  padding-right: 28px; /* Extra padding to account for potential scrollbar */
   padding-bottom: max(12px, calc(12px + env(safe-area-inset-bottom)));
   box-sizing: border-box;
   width: 100%;
@@ -597,6 +604,7 @@
 .App.high-visibility.no-animation .chat-window.mobile .chat-input,
 .App.high-visibility.no-animation .chat-window.mobile.keyboard-open .chat-input {
   padding: 12px;
+  padding-right: 28px; /* Extra padding to account for potential scrollbar */
   padding-bottom: max(12px, calc(12px + env(safe-area-inset-bottom)));
   box-sizing: border-box;
   width: 100%;

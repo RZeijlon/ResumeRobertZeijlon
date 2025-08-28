@@ -10,6 +10,7 @@ export interface CustomTheme {
     frames: string
     'lighter-background': string
     'darker-background': string
+    'background-contrast': string
   }
   effects: {
     matrixBackground: boolean
@@ -21,12 +22,14 @@ export const useThemeManager = (themeConfig: ThemeConfig | null) => {
   const [currentTheme, setCurrentTheme] = useState<ThemeMode>('default-dark')
   const [customTheme, setCustomTheme] = useState<CustomTheme | null>(null)
   const [isDarkMode, setIsDarkMode] = useState(true)
+  const [animationsEnabled, setAnimationsEnabled] = useState(true)
 
   // Load theme from localStorage on mount
   useEffect(() => {
     const savedTheme = localStorage.getItem('portfolio-theme')
     const savedCustomTheme = localStorage.getItem('portfolio-custom-theme')
     const savedDarkMode = localStorage.getItem('portfolio-dark-mode')
+    const savedAnimationsEnabled = localStorage.getItem('portfolio-animations-enabled')
 
     if (savedTheme) {
       setCurrentTheme(savedTheme as ThemeMode)
@@ -40,6 +43,9 @@ export const useThemeManager = (themeConfig: ThemeConfig | null) => {
     }
     if (savedDarkMode !== null) {
       setIsDarkMode(savedDarkMode === 'true')
+    }
+    if (savedAnimationsEnabled !== null) {
+      setAnimationsEnabled(savedAnimationsEnabled === 'true')
     }
   }, [])
 
@@ -68,6 +74,7 @@ export const useThemeManager = (themeConfig: ThemeConfig | null) => {
     root.style.setProperty('--frames', themeToApply.colors.frames)
     root.style.setProperty('--lighter-background', themeToApply.colors['lighter-background'])
     root.style.setProperty('--darker-background', themeToApply.colors['darker-background'])
+    root.style.setProperty('--background-contrast', themeToApply.colors['background-contrast'])
 
     // Legacy variables for compatibility
     root.style.setProperty('--teal', themeToApply.colors.highlight)
@@ -83,7 +90,6 @@ export const useThemeManager = (themeConfig: ThemeConfig | null) => {
 
     // Update body classes for effects
     document.body.classList.toggle('matrix-background', themeToApply.effects.matrixBackground)
-    document.body.classList.toggle('no-animations', !themeToApply.effects.animations)
 
   }, [themeConfig, currentTheme, customTheme])
 
@@ -138,6 +144,12 @@ export const useThemeManager = (themeConfig: ThemeConfig | null) => {
     localStorage.setItem('portfolio-theme', 'custom')
   }
 
+  const toggleAnimations = () => {
+    const newAnimationsEnabled = !animationsEnabled
+    setAnimationsEnabled(newAnimationsEnabled)
+    localStorage.setItem('portfolio-animations-enabled', newAnimationsEnabled.toString())
+  }
+
   const getAvailableThemes = () => {
     if (!themeConfig) return []
     
@@ -161,19 +173,33 @@ export const useThemeManager = (themeConfig: ThemeConfig | null) => {
   const getCurrentThemeConfig = () => {
     if (!themeConfig) return null
     
+    let baseConfig
     if (currentTheme === 'custom' && customTheme) {
-      return customTheme
+      baseConfig = customTheme
+    } else {
+      baseConfig = themeConfig.themes[currentTheme]
     }
     
-    return themeConfig.themes[currentTheme] || null
+    if (!baseConfig) return null
+    
+    // Override animations setting with user preference
+    return {
+      ...baseConfig,
+      effects: {
+        ...baseConfig.effects,
+        animations: animationsEnabled && baseConfig.effects.animations
+      }
+    }
   }
 
   return {
     currentTheme,
     isDarkMode,
     customTheme,
+    animationsEnabled,
     switchTheme,
     toggleDarkMode,
+    toggleAnimations,
     createCustomTheme,
     getAvailableThemes,
     getCurrentThemeConfig,

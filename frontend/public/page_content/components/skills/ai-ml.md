@@ -4,7 +4,7 @@ title: "AI/ML Technologies"
 order: 1
 ---
 
-## AI/ML Technologies
+## **AI/ML Technologies**
 
 - **Machine Learning**: TensorFlow, PyTorch, scikit-learn
 - **Generative AI**: Local LLM implementations, API integrations

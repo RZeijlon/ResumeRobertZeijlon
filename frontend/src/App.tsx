@@ -13,6 +13,7 @@ function App() {
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [showMobileMenu, setShowMobileMenu] = useState(false)
+  const [useFullscreenChat, setUseFullscreenChat] = useState(false)
 
   // Load content and theme management
   const contentManager = useContentManager()
@@ -21,6 +22,7 @@ function App() {
   const {
     siteConfig,
     layoutConfig,
+    designConfig,
     personalInfo,
     loading,
     error,
@@ -32,15 +34,32 @@ function App() {
   const { currentTheme, getCurrentThemeConfig } = themeManager
 
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768)
+    const checkScreenSize = () => {
+      const width = window.innerWidth
+      setIsMobile(width <= 768)
+      // Use fullscreen chat if window is too small to fit both content and chat comfortably
+      setUseFullscreenChat(width < 1024)
     }
     
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
+    checkScreenSize()
+    window.addEventListener('resize', checkScreenSize)
     
-    return () => window.removeEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkScreenSize)
   }, [])
+
+  // Apply design configuration as CSS custom properties
+  useEffect(() => {
+    if (designConfig) {
+      const root = document.documentElement
+      root.style.setProperty('--box-padding', designConfig.spacing.box_padding)
+      root.style.setProperty('--box-margin', designConfig.spacing.box_margin)
+      root.style.setProperty('--section-gap', designConfig.spacing.section_gap)
+      root.style.setProperty('--grid-gap', designConfig.spacing.grid_gap)
+      root.style.setProperty('--border-radius', designConfig.borders.radius)
+      root.style.setProperty('--box-shadow', designConfig.effects.box_shadow)
+      root.style.setProperty('--transition-speed', designConfig.effects.transition_speed)
+    }
+  }, [designConfig])
 
   const openChat = () => {
     window.dispatchEvent(new CustomEvent('openChat'))
@@ -72,7 +91,7 @@ function App() {
     )
   }
 
-  if (!siteConfig || !layoutConfig || !personalInfo) {
+  if (!siteConfig || !layoutConfig || !designConfig || !personalInfo) {
     return (
       <div className="App error">
         <div className="error-message">
@@ -90,14 +109,17 @@ function App() {
   const appClasses = [
     'App',
     currentTheme === 'high-contrast' ? 'high-visibility' : '',
+    currentTheme.includes('light') ? 'light-mode' : '',
     currentThemeConfig && !currentThemeConfig.effects.animations ? 'no-animation' : '',
-    isChatOpen && !isMobile ? 'chat-open' : ''
+    isChatOpen && !useFullscreenChat ? 'chat-open' : ''
   ].filter(Boolean).join(' ')
 
   return (
     <div className={appClasses}>
-      {/* Matrix background only if theme allows */}
-      {currentThemeConfig?.effects.matrixBackground && <MatrixBackground />}
+      {/* Matrix background for both themes */}
+      {currentThemeConfig?.effects.matrixBackground && currentThemeConfig?.effects.animations && (
+        <MatrixBackground isDarkMode={!currentTheme.includes('light')} />
+      )}
       
       {/* Skip to main content link */}
       <a href="#main" className="skip-link">Skip to main content</a>
