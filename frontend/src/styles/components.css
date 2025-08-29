@@ -300,12 +300,13 @@
   text-decoration: none;
   font-size: var(--font-size-small);
   font-weight: 500;
-  transition: background var(--transition-fast);
+  transition: all var(--transition-fast);
 }
 
 .project-links a:hover {
   background: var(--frames);
   color: var(--darker-background);
+  transform: scale(1.05);
 }
 
 /* Skills Grid Styles */
@@ -351,6 +352,7 @@
   background: transparent;
   color: var(--highlight);
   border-color: var(--highlight);
+  transform: scale(1.05);
 }
 
 .contact-icon {

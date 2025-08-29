@@ -8,15 +8,33 @@ Robert Zeijlon's dynamic portfolio website built with React 19 + TypeScript + Vi
 
 ## Development Commands
 
+**Frontend Development** (from `frontend/` directory):
 - `npm run dev` - Start development server with hot reload (port 5173)
 - `npm run build` - Build for production (runs TypeScript compiler then Vite build)
 - `npm run lint` - Run ESLint on all files
 - `npm run preview` - Preview the production build locally
 
+**Full Stack Development** (Docker-based, from root):
+- `./scripts/dev-start.sh` - Start complete development environment (frontend + backend + database)
+- `docker compose up --build` - Manual container startup
+- `docker compose down` - Stop all services
+- `docker compose logs -f [service]` - View service logs
+
+**Backend API** (FastAPI with RAG system):
+- Backend runs on port 8000 with auto-reload
+- API docs available at http://localhost:8000/docs
+- RAG system processes content from `frontend/public/page_content/rag-knowledge-base/`
+
 ## Architecture
 
-**Core Framework:**
-- React 19 with TypeScript and Vite
+**Full Stack Architecture:**
+- **Frontend**: React 19 with TypeScript and Vite (port 5173)
+- **Backend**: FastAPI with Python 3.11+ (port 8000)
+- **Database**: PostgreSQL 15 with pgvector extension for embeddings
+- **AI**: Groq SDK integration with RAG (Retrieval Augmented Generation)
+- **Deployment**: Docker Compose with multi-stage builds
+
+**Frontend Framework:**
 - Single-page application with dynamic section rendering
 - Custom hooks for state management (useContentManager, useThemeManager)
 - React Icons for UI elements
@@ -95,17 +113,36 @@ The portfolio uses a sophisticated content management approach:
 - Dynamic CSS custom properties
 - Animation and matrix background controls
 
-**AI Integration:**
-- Groq SDK integration for chat functionality
-- RAG (Retrieval Augmented Generation) with comprehensive knowledge base
-- Context-aware responses about professional experience
-- Configurable welcome messages
+**AI Integration & RAG System:**
+- **Frontend**: Groq SDK integration for chat functionality with configurable welcome messages
+- **Backend**: FastEmbed + PostgreSQL pgvector for semantic search and embeddings
+- **RAG Pipeline**: 
+  1. Content chunking from `rag-knowledge-base/` markdown files
+  2. Embedding generation using FastEmbed models
+  3. Vector similarity search with cosine similarity
+  4. Context-aware response generation via Groq API
+- **Models**: Uses `llama-3.3-70b-versatile` for chat, FastEmbed for embeddings
+- **Knowledge Base**: Comprehensive professional content in `frontend/public/page_content/rag-knowledge-base/`
 
 ## Development Notes
 
+**Frontend:**
 - No test framework configured
 - Strict TypeScript with comprehensive ESLint rules
 - Hot module reloading for rapid development
 - All content externalized to allow non-technical updates
 - Image optimization and proper asset serving
-- Security best practices for external links
+
+**Backend & Infrastructure:**
+- FastAPI with automatic OpenAPI documentation
+- AsyncPG for database operations with connection pooling
+- Environment-based configuration via `app/core/config.py`
+- Vector embeddings stored in PostgreSQL with pgvector extension
+- Health checks and proper error handling throughout the stack
+- Docker multi-stage builds for optimized production images
+
+**Content Processing:**
+- Markdown files with YAML frontmatter for metadata
+- Automatic content chunking and embedding generation
+- File-based content management allows non-technical updates
+- RAG knowledge base processing via `backend/app/services/rag_service.py`
