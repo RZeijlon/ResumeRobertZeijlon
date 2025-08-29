@@ -46,6 +46,9 @@ class VectorStore:
         
         try:
             async with self.connection_pool.acquire() as conn:
+                # Convert embedding list to pgvector format
+                embedding_str = f"[{','.join(map(str, embedding))}]"
+                
                 await conn.execute("""
                     INSERT INTO content_embeddings 
                     (content_id, file_path, content, metadata, embedding)
@@ -56,7 +59,7 @@ class VectorStore:
                         embedding = EXCLUDED.embedding,
                         updated_at = NOW()
                 """, chunk.content_id, chunk.file_path, chunk.content, 
-                    json.dumps(chunk.metadata), embedding)
+                    json.dumps(chunk.metadata), embedding_str)
             return True
         except Exception as e:
             print(f"❌ Error storing embedding: {e}")
@@ -69,6 +72,9 @@ class VectorStore:
         
         try:
             async with self.connection_pool.acquire() as conn:
+                # Convert query embedding to pgvector format
+                query_embedding_str = f"[{','.join(map(str, query_embedding))}]"
+                
                 results = await conn.fetch("""
                     SELECT content_id, file_path, content, metadata,
                            1 - (embedding <=> $1::vector) as similarity
@@ -76,14 +82,14 @@ class VectorStore:
                     WHERE 1 - (embedding <=> $1::vector) > $3
                     ORDER BY embedding <=> $1::vector
                     LIMIT $2
-                """, query_embedding, limit, threshold)
+                """, query_embedding_str, limit, threshold)
                 
                 return [
                     {
                         "content_id": row["content_id"],
                         "file_path": row["file_path"],
                         "content": row["content"],
-                        "metadata": row["metadata"],
+                        "metadata": json.loads(row["metadata"]) if isinstance(row["metadata"], str) else row["metadata"],
                         "similarity": float(row["similarity"])
                     }
                     for row in results
@@ -302,12 +308,7 @@ Always base your responses on the provided context about Robert's background and
         return {
             "response": response,
             "sources": [
-                {
-                    "content_id": result["content_id"],
-                    "file_path": result["file_path"],
-                    "similarity": result["similarity"],
-                    "type": result.get("metadata", {}).get("type", "content")
-                }
+                f"{result['file_path']} ({result.get('metadata', {}).get('type', 'content')}, {result['similarity']:.2f})"
                 for result in context_results
             ],
             "context_used": len(context_results) > 0

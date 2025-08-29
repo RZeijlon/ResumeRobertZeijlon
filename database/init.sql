@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS content_embeddings (
     file_path TEXT NOT NULL,
     content TEXT NOT NULL,
     metadata JSONB,
-    embedding vector(1536), -- OpenAI ada-002 embedding size
+    embedding vector(384), -- MiniLM-L6-v2 embedding size
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     

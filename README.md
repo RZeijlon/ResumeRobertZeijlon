@@ -24,33 +24,108 @@
 
 ## 🚀 Quick Start
 
-### Development Environment
+### Prerequisites
+- **Docker** or **Podman** with compose support
+- **Git** for cloning the repository
+- **Optional**: Node.js 18+ for local frontend development
 
-1. **Setup the project:**
-   ```bash
-   ./scripts/setup.sh
-   ```
+### 🐳 Container Setup (Docker/Podman)
 
-2. **Configure environment:**
-   ```bash
-   # Edit .env file with your API keys
-   cp .env.example .env
-   ```
+#### Using Docker
+```bash
+# 1. Clone the repository
+git clone https://github.com/your-username/ResumeRobertZeijlon.git
+cd ResumeRobertZeijlon
 
-3. **Start development server:**
+# 2. Configure environment variables
+cp .env.example .env
+# Edit .env file with your API keys (optional for basic functionality)
+
+# 3. Start all services
+docker-compose up -d
+
+# 4. Initialize RAG system (optional, for AI chat functionality)
+curl -X POST http://localhost:8000/api/v1/chat/initialize-rag
+
+# 5. Verify everything is working
+./verify-setup.sh
+```
+
+#### Using Podman
+```bash
+# 1. Clone the repository
+git clone https://github.com/your-username/ResumeRobertZeijlon.git
+cd ResumeRobertZeijlon
+
+# 2. Configure environment variables
+cp .env.example .env
+# Edit .env file with your API keys (optional for basic functionality)
+
+# 3. Start all services with Podman Compose
+podman-compose up -d
+
+# 4. Initialize RAG system (optional, for AI chat functionality)
+curl -X POST http://localhost:8000/api/v1/chat/initialize-rag
+
+# 5. Verify everything is working
+./verify-setup.sh
+```
+
+### 🌐 Access Your Portfolio
+
+After starting the containers, your services will be available at:
+
+- **Portfolio Website**: http://localhost:5173
+- **Backend API**: http://localhost:8000
+- **API Documentation**: http://localhost:8000/docs
+- **Database**: localhost:5432
+
+### 🤖 RAG Chat System Setup
+
+The portfolio includes an AI-powered chatbot with RAG (Retrieval-Augmented Generation) capabilities:
+
+1. **Environment Variables** (add to `.env`):
    ```bash
-   # Frontend only
-   cd frontend && npm run dev
+   # Required for AI chat functionality
+   GROQ_API_KEY=your_groq_api_key_here
    
-   # Full stack with containers
-   ./scripts/dev-start.sh
+   # Optional: OpenAI API key as fallback for embeddings
+   OPENAI_API_KEY=your_openai_api_key_here
    ```
 
-### Production Deployment
+2. **Initialize Knowledge Base**:
+   ```bash
+   # This processes 61 content chunks from 21 files
+   curl -X POST http://localhost:8000/api/v1/chat/initialize-rag
+   ```
+
+3. **Test RAG Chat**:
+   ```bash
+   curl -X POST http://localhost:8000/api/v1/chat/message \
+     -H "Content-Type: application/json" \
+     -d '{"message": "Tell me about Roberts background", "use_rag": true}'
+   ```
+
+### 📊 System Architecture
+
+- **Frontend**: React 19 + TypeScript + Vite (Port 5173)
+- **Backend**: FastAPI + Python (Port 8000)
+- **Database**: PostgreSQL + pgvector (Port 5432)
+- **Embeddings**: FastEmbed with BAAI/bge-small-en-v1.5 (384-dim, CPU-only)
+- **LLM**: Groq API with Llama-3.3-70b-versatile
+
+### ⚡ Development Mode
+
+For faster frontend development without full container stack:
 
 ```bash
-# Deploy to production
-./scripts/prod-deploy.sh
+# Start backend services only
+docker-compose up -d database backend
+
+# Run frontend locally with hot reload
+cd frontend
+npm install
+npm run dev
 ```
 
 ## 📁 Project Structure
@@ -142,17 +217,105 @@ Edit `page_content/config/theme.json`:
 - **pgvector** for vector similarity search
 - **Pydantic** for data validation
 
+### AI/ML Stack
+- **FastEmbed** - Lightweight, CPU-optimized embeddings (ONNX runtime)
+- **BAAI/bge-small-en-v1.5** - 384-dimensional embedding model
+- **Groq API** - Fast LLM inference with Llama-3.3-70b-versatile
+- **PostgreSQL + pgvector** - Vector similarity search database
+
 ### Infrastructure
 - **Docker/Podman** containerization
-- **Nginx** reverse proxy
-- **Redis** for caching (production)
-- **PostgreSQL** with vector extension
+- **PostgreSQL** with pgvector extension
+- **CPU-only deployment** - No GPU requirements
+- **Production-ready** architecture
+
+## 🔧 Troubleshooting & Management
+
+### Container Management
+
+#### Docker Commands
+```bash
+# Check container status
+docker-compose ps
+
+# View logs
+docker-compose logs -f backend
+docker-compose logs -f frontend-dev
+docker-compose logs -f database
+
+# Restart services
+docker-compose restart backend
+
+# Clean rebuild
+docker-compose down
+docker-compose build --no-cache
+docker-compose up -d
+```
+
+#### Podman Commands
+```bash
+# Check container status
+podman-compose ps
+
+# View logs
+podman-compose logs -f backend
+podman logs portfolio-backend --tail 50
+
+# Restart services
+podman-compose restart backend
+
+# Clean rebuild
+podman-compose down
+podman-compose build --no-cache
+podman-compose up -d
+```
+
+### RAG System Management
+
+```bash
+# Check RAG status
+curl -s http://localhost:8000/api/v1/chat/rag-status
+
+# Reinitialize embeddings (if content changed)
+curl -X POST http://localhost:8000/api/v1/chat/initialize-rag
+
+# Test RAG functionality
+curl -X POST http://localhost:8000/api/v1/chat/message \
+  -H "Content-Type: application/json" \
+  -d '{"message": "What can you tell me about Robert?", "use_rag": true}'
+
+# Check backend health
+curl -s http://localhost:8000/health
+```
+
+### Common Issues
+
+1. **Port conflicts**: If ports 5173, 8000, or 5432 are in use, modify `docker-compose.yml`
+2. **Permission issues**: Run `chmod +x scripts/*.sh` if scripts aren't executable
+3. **Database connection**: Ensure PostgreSQL container is healthy before backend starts
+4. **RAG not working**: Check that GROQ_API_KEY is set and valid
+5. **Frontend not loading**: Clear browser cache and ensure containers are running
+
+### Performance Monitoring
+
+```bash
+# Check resource usage
+docker-compose top
+podman-compose top
+
+# Database connections
+docker exec -it portfolio-db psql -U portfolio -d portfolio -c "SELECT count(*) FROM content_embeddings;"
+
+# Vector search test
+curl -s http://localhost:8000/api/v1/content/search?q=robert
+```
 
 ## 📚 Documentation
 
 - **Implementation Roadmap**: [IMPLEMENTATION_ROADMAP.md](IMPLEMENTATION_ROADMAP.md)
 - **Development Guide**: [CLAUDE.md](CLAUDE.md)
 - **API Documentation**: http://localhost:8000/docs (when running)
+- **RAG Knowledge Base**: [frontend/public/page_content/rag-knowledge-base/](frontend/public/page_content/rag-knowledge-base/)
 
 ## 🤝 Contributing
 

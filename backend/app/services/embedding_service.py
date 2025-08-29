@@ -77,9 +77,15 @@ class EmbeddingService:
         return chunks
     
     async def generate_embedding(self, text: str) -> Optional[List[float]]:
-        """Generate embedding for a piece of text using OpenAI API"""
+        """Generate embedding using MiniLM or OpenAI API as fallback"""
+        # Try MiniLM local model first
+        minilm_embedding = await self._generate_minilm_embedding(text)
+        if minilm_embedding is not None:
+            return minilm_embedding
+            
+        # Fallback to OpenAI if MiniLM fails and API key is available
         if not self.openai_api_key:
-            print("⚠️  OpenAI API key not found, skipping embedding generation")
+            print("⚠️  No embedding method available (no MiniLM model and no OpenAI API key)")
             return None
         
         try:
@@ -110,6 +116,55 @@ class EmbeddingService:
                         
         except Exception as e:
             print(f"❌ Error generating embedding: {e}")
+            return None
+    
+    async def _generate_minilm_embedding(self, text: str) -> Optional[List[float]]:
+        """Generate embedding using FastEmbed MiniLM model (local, CPU-friendly)"""
+        try:
+            # Try importing fastembed
+            from fastembed import TextEmbedding
+            
+            # Initialize model if not already done
+            if not hasattr(self, '_minilm_model'):
+                print("🔄 Loading FastEmbed MiniLM model: BAAI/bge-small-en-v1.5")
+                loop = asyncio.get_event_loop()
+                
+                # Use a lighter model available in FastEmbed
+                self._minilm_model = await loop.run_in_executor(
+                    None, 
+                    lambda: TextEmbedding(model_name="BAAI/bge-small-en-v1.5")
+                )
+                self.embedding_dimension = 384  # BGE-small dimension
+                print("✅ FastEmbed model loaded successfully")
+                print(f"   - Model: BAAI/bge-small-en-v1.5")
+                print(f"   - Embedding dimension: {self.embedding_dimension}")
+                print(f"   - CPU-optimized ONNX runtime")
+            
+            # Generate embedding
+            clean_text = text.replace("\n", " ").strip()
+            if not clean_text:
+                return None
+                
+            print(f"🧮 Generating FastEmbed embedding for text: '{clean_text[:100]}{'...' if len(clean_text) > 100 else ''}'")
+            
+            loop = asyncio.get_event_loop()
+            embeddings = await loop.run_in_executor(
+                None,
+                lambda: list(self._minilm_model.embed([clean_text]))
+            )
+            
+            embedding_list = embeddings[0].tolist()
+            print(f"✅ Generated FastEmbed embedding: dimension={len(embedding_list)}")
+            
+            return embedding_list
+            
+        except ImportError:
+            print("⚠️  FastEmbed not available, will try OpenAI API")
+            return None
+        except Exception as e:
+            print(f"⚠️  FastEmbed embedding failed: {e}, will try OpenAI API")
+            import traceback
+            print(f"🔥 Full traceback:\n{traceback.format_exc()}")
             return None
     
     async def generate_embeddings_batch(self, texts: List[str]) -> List[Optional[List[float]]]:
