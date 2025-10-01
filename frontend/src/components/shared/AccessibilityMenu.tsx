@@ -1,16 +1,10 @@
 import React, { useState } from 'react'
 import { FaUniversalAccess } from 'react-icons/fa'
-import { useThemeManager } from '../hooks/useThemeManager'
+import { useTheme } from '../../contexts'
 
-interface AccessibilityMenuProps {
-  themeManager: ReturnType<typeof useThemeManager>
-}
-
-export const AccessibilityMenu: React.FC<AccessibilityMenuProps> = ({ themeManager }) => {
+export const AccessibilityMenu: React.FC = () => {
   const [showMenu, setShowMenu] = useState(false)
-
-  const { currentTheme, animationsEnabled, switchTheme, toggleAnimations, getCurrentThemeConfig } = themeManager
-  const currentThemeConfig = getCurrentThemeConfig()
+  const { currentTheme, animationsEnabled, switchTheme, toggleAnimations } = useTheme()
 
   const handleHighVisibilityToggle = (enabled: boolean) => {
     if (enabled) {

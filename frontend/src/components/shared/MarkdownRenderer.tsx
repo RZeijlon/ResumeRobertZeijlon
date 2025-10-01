@@ -1,5 +1,5 @@
 import ReactMarkdown from 'react-markdown'
-import type { ContentItem } from '../hooks/useContentManager'
+import type { ContentItem } from '../../types'
 
 interface MarkdownRendererProps {
   content: ContentItem

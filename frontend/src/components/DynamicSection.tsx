@@ -1,6 +1,6 @@
 import React from 'react'
-import MarkdownRenderer from './MarkdownRenderer'
-import type { ContentItem, PersonalInfo } from '../hooks/useContentManager'
+import MarkdownRenderer from './shared/MarkdownRenderer'
+import type { ContentItem, PersonalInfo } from '../types'
 import { FaLinkedin, FaGithub, FaEnvelope, FaPhone } from 'react-icons/fa'
 
 interface DynamicSectionProps {
@@ -61,8 +61,12 @@ export const DynamicSection: React.FC<DynamicSectionProps> = ({
 
   const renderSkillsGrid = () => {
     if (!contents) return null
-    
-    const sortedContents = contents.sort((a, b) => (a.metadata.order || 0) - (b.metadata.order || 0))
+
+    const sortedContents = contents.sort((a, b) => {
+      const aOrder = typeof a.metadata.order === 'number' ? a.metadata.order : 0
+      const bOrder = typeof b.metadata.order === 'number' ? b.metadata.order : 0
+      return aOrder - bOrder
+    })
     
     return (
       <div className={`skills-grid ${width === 'dynamic' ? 'dynamic-width' : 'full-width'}`}>
@@ -87,13 +91,9 @@ export const DynamicSection: React.FC<DynamicSectionProps> = ({
 
   const renderProjectsSection = () => {
     if (!content) return null
-    
-    // Debug: log the content to see what's available
-    console.log('Projects section content:', content)
-    
-    // Hardcode for now to test if the issue is with metadata
-    const title = 'Featured Projects'
-    
+
+    const title = content.metadata.title || 'Featured Projects'
+
     return (
       <section id={sectionId} className="projects">
         <div className="projects-header">
@@ -105,34 +105,45 @@ export const DynamicSection: React.FC<DynamicSectionProps> = ({
 
   const renderProjectGrid = () => {
     if (!contents) return null
-    
-    const sortedProjects = contents.sort((a, b) => (a.metadata.order || 0) - (b.metadata.order || 0))
-    
+
+    const sortedProjects = contents.sort((a, b) => {
+      const aOrder = typeof a.metadata.order === 'number' ? a.metadata.order : 0
+      const bOrder = typeof b.metadata.order === 'number' ? b.metadata.order : 0
+      return aOrder - bOrder
+    })
+
     return (
       <div className="project-grid">
-        {sortedProjects.map((project) => (
-          <div key={project.id} className={`project-card ${project.metadata.featured ? 'featured' : ''}`}>
-            {project.metadata.image && (
-              <div className="project-image">
-                <img 
-                  src={project.metadata.image.startsWith('/') ? project.metadata.image : `/page_content/assets/images/${project.metadata.image}`}
-                  alt={project.metadata.title || project.id}
-                />
-              </div>
-            )}
-            <MarkdownRenderer content={project} />
-            {project.metadata.tech && (
-              <p className="project-tech">{project.metadata.tech}</p>
-            )}
-            {project.metadata.github && (
-              <div className="project-links">
-                <a href={project.metadata.github} target="_blank" rel="noopener noreferrer">
-                  View on GitHub
-                </a>
-              </div>
-            )}
-          </div>
-        ))}
+        {sortedProjects.map((project) => {
+          const image = typeof project.metadata.image === 'string' ? project.metadata.image : undefined
+          const title = typeof project.metadata.title === 'string' ? project.metadata.title : undefined
+          const tech = typeof project.metadata.tech === 'string' ? project.metadata.tech : undefined
+          const github = typeof project.metadata.github === 'string' ? project.metadata.github : undefined
+
+          return (
+            <div key={project.id} className={`project-card ${project.metadata.featured ? 'featured' : ''}`}>
+              {image && (
+                <div className="project-image">
+                  <img
+                    src={image.startsWith('/') ? image : `/page_content/assets/images/${image}`}
+                    alt={title || project.id}
+                  />
+                </div>
+              )}
+              <MarkdownRenderer content={project} />
+              {tech && (
+                <p className="project-tech">{tech}</p>
+              )}
+              {github && (
+                <div className="project-links">
+                  <a href={github} target="_blank" rel="noopener noreferrer">
+                    View on GitHub
+                  </a>
+                </div>
+              )}
+            </div>
+          )
+        })}
       </div>
     )
   }

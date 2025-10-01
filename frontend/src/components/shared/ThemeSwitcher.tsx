@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { FaUniversalAccess, FaSun, FaMoon, FaPalette } from 'react-icons/fa'
-import { useThemeManager } from '../hooks/useThemeManager'
+import { useThemeManager } from '../../hooks/useThemeManager'
 
 interface ThemeSwitcherProps {
   themeManager: ReturnType<typeof useThemeManager>
@@ -13,7 +13,8 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ themeManager }) =>
     highlight: '#20b2aa',
     frames: '#2e8b45',
     'lighter-background': '#2d342d',
-    'darker-background': '#1a1f1a'
+    'darker-background': '#1a1f1a',
+    'background-contrast': '#0d110d'
   })
 
   const {
@@ -77,10 +78,10 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ themeManager }) =>
                 <span className="theme-name">{theme.name}</span>
                 <div className="theme-preview">
                   {Object.entries(theme.colors).map(([key, color]) => (
-                    <div 
+                    <div
                       key={key}
                       className="color-preview"
-                      style={{ backgroundColor: color }}
+                      style={{ backgroundColor: color as string }}
                       title={key}
                     />
                   ))}

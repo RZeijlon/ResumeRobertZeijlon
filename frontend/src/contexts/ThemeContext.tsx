@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
-import type { ThemeConfig } from './useContentManager'
+import { createContext, useContext, useState, useEffect } from 'react'
+import type { ReactNode } from 'react'
+import type { ThemeConfig } from '../types'
 
 export type ThemeMode = 'default-dark' | 'default-light' | 'high-contrast' | 'custom'
 
@@ -18,7 +19,46 @@ export interface CustomTheme {
   }
 }
 
-export const useThemeManager = (themeConfig: ThemeConfig | null) => {
+interface ThemeContextType {
+  currentTheme: ThemeMode
+  isDarkMode: boolean
+  customTheme: CustomTheme | null
+  animationsEnabled: boolean
+  switchTheme: (theme: ThemeMode) => void
+  toggleDarkMode: () => void
+  toggleAnimations: () => void
+  createCustomTheme: (colors: CustomTheme['colors'], name?: string) => void
+  getAvailableThemes: () => Array<{ id: ThemeMode; name: string; colors: CustomTheme['colors'] }>
+  getCurrentThemeConfig: () => CustomTheme | null
+}
+
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
+
+export const useTheme = () => {
+  const context = useContext(ThemeContext)
+  if (!context) {
+    throw new Error('useTheme must be used within a ThemeProvider')
+  }
+  return context
+}
+
+const isLightColor = (hex: string): boolean => {
+  const rgb = hexToRgb(hex)
+  if (!rgb) return false
+  const brightness = (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000
+  return brightness > 128
+}
+
+const hexToRgb = (hex: string) => {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+  return result ? {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16)
+  } : null
+}
+
+export const ThemeProvider = ({ children, themeConfig }: { children: ReactNode; themeConfig: ThemeConfig | null }) => {
   const [currentTheme, setCurrentTheme] = useState<ThemeMode>('default-dark')
   const [customTheme, setCustomTheme] = useState<CustomTheme | null>(null)
   const [isDarkMode, setIsDarkMode] = useState(true)
@@ -91,28 +131,12 @@ export const useThemeManager = (themeConfig: ThemeConfig | null) => {
     // Update body classes for effects
     document.body.classList.toggle('matrix-background', themeToApply.effects.matrixBackground)
 
-  }, [themeConfig, currentTheme, customTheme])
-
-  const isLightColor = (hex: string): boolean => {
-    const rgb = hexToRgb(hex)
-    if (!rgb) return false
-    const brightness = (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000
-    return brightness > 128
-  }
-
-  const hexToRgb = (hex: string) => {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
-    return result ? {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16)
-    } : null
-  }
+  }, [themeConfig, currentTheme, customTheme, animationsEnabled])
 
   const switchTheme = (theme: ThemeMode) => {
     setCurrentTheme(theme)
     localStorage.setItem('portfolio-theme', theme)
-    
+
     if (theme !== 'custom') {
       // Update dark mode based on theme
       const newIsDarkMode = theme === 'default-dark' || theme === 'high-contrast'
@@ -123,7 +147,7 @@ export const useThemeManager = (themeConfig: ThemeConfig | null) => {
 
   const toggleDarkMode = () => {
     if (currentTheme === 'custom') return // Don't toggle for custom themes
-    
+
     const newTheme = isDarkMode ? 'default-light' : 'default-dark'
     switchTheme(newTheme)
   }
@@ -137,7 +161,7 @@ export const useThemeManager = (themeConfig: ThemeConfig | null) => {
         animations: true
       }
     }
-    
+
     setCustomTheme(theme)
     setCurrentTheme('custom')
     localStorage.setItem('portfolio-custom-theme', JSON.stringify(theme))
@@ -152,7 +176,7 @@ export const useThemeManager = (themeConfig: ThemeConfig | null) => {
 
   const getAvailableThemes = () => {
     if (!themeConfig) return []
-    
+
     const themes = Object.entries(themeConfig.themes).map(([key, theme]) => ({
       id: key as ThemeMode,
       name: theme.name,
@@ -172,16 +196,16 @@ export const useThemeManager = (themeConfig: ThemeConfig | null) => {
 
   const getCurrentThemeConfig = () => {
     if (!themeConfig) return null
-    
+
     let baseConfig
     if (currentTheme === 'custom' && customTheme) {
       baseConfig = customTheme
     } else {
       baseConfig = themeConfig.themes[currentTheme]
     }
-    
+
     if (!baseConfig) return null
-    
+
     // Override animations setting with user preference
     return {
       ...baseConfig,
@@ -192,7 +216,7 @@ export const useThemeManager = (themeConfig: ThemeConfig | null) => {
     }
   }
 
-  return {
+  const value: ThemeContextType = {
     currentTheme,
     isDarkMode,
     customTheme,
@@ -202,7 +226,8 @@ export const useThemeManager = (themeConfig: ThemeConfig | null) => {
     toggleAnimations,
     createCustomTheme,
     getAvailableThemes,
-    getCurrentThemeConfig,
-    themeConfig
+    getCurrentThemeConfig
   }
+
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
 }

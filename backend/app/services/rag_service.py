@@ -10,9 +10,12 @@ import os
 from pathlib import Path
 
 from app.core.config import settings
+from app.core.logging import get_logger
 from app.services.embedding_service import embedding_service, ContentChunk
 from app.services.content_service import content_service
 from app.utils.markdown import parse_frontmatter
+
+logger = get_logger(__name__)
 
 
 class VectorStore:
@@ -30,9 +33,9 @@ class VectorStore:
                 max_size=10,
                 command_timeout=60
             )
-            print("✅ Vector store initialized successfully")
+            logger.info("Vector store initialized successfully")
         except Exception as e:
-            print(f"❌ Failed to initialize vector store: {e}")
+            logger.error(f"Failed to initialize vector store: {e}")
     
     async def close(self):
         """Close database connections"""
@@ -62,7 +65,7 @@ class VectorStore:
                     json.dumps(chunk.metadata), embedding_str)
             return True
         except Exception as e:
-            print(f"❌ Error storing embedding: {e}")
+            logger.error(f"Error storing embedding: {e}")
             return False
     
     async def similarity_search(self, query_embedding: List[float], limit: int = 5, threshold: float = 0.7) -> List[Dict[str, Any]]:
@@ -95,7 +98,7 @@ class VectorStore:
                     for row in results
                 ]
         except Exception as e:
-            print(f"❌ Error in similarity search: {e}")
+            logger.error(f"Error in similarity search: {e}")
             return []
     
     async def get_content_by_type(self, content_type: str) -> List[Dict[str, Any]]:
@@ -122,7 +125,7 @@ class VectorStore:
                     for row in results
                 ]
         except Exception as e:
-            print(f"❌ Error fetching content by type: {e}")
+            logger.error(f"Error fetching content by type: {e}")
             return []
 
 
@@ -156,11 +159,11 @@ Always base your responses on the provided context about Robert's background and
     async def initialize(self):
         """Initialize the RAG service"""
         await self.vector_store.initialize()
-        print("✅ RAG service initialized")
+        logger.info("RAG service initialized")
     
     async def process_content_directory(self, force_refresh: bool = False) -> Dict[str, Any]:
         """Process all content files and generate embeddings"""
-        print("🔄 Processing content directory for embeddings...")
+        logger.info("Processing content directory for embeddings...")
         
         content_path = Path(settings.CONTENT_PATH)
         if not content_path.exists():
@@ -203,13 +206,13 @@ Always base your responses on the provided context about Robert's background and
                         stats["skipped"] += 1
                 
                 stats["processed_files"] += 1
-                print(f"✅ Processed {relative_path} ({len(chunks)} chunks)")
+                logger.info(f"Processed {relative_path} ({len(chunks)} chunks)")
                 
             except Exception as e:
-                print(f"❌ Error processing {file_path}: {e}")
+                logger.error(f"Error processing {file_path}: {e}")
                 stats["errors"] += 1
         
-        print(f"📊 Content processing complete: {stats}")
+        logger.info(f"Content processing complete: {stats}")
         return stats
     
     async def retrieve_context(self, query: str, max_results: int = 5) -> List[Dict[str, Any]]:
@@ -217,7 +220,7 @@ Always base your responses on the provided context about Robert's background and
         # Generate embedding for the query
         query_embedding = await embedding_service.generate_embedding(query)
         if not query_embedding:
-            print("⚠️  Could not generate embedding for query")
+            logger.warning("Could not generate embedding for query")
             return []
         
         # Search for similar content
@@ -287,11 +290,11 @@ Always base your responses on the provided context about Robert's background and
                         return data["choices"][0]["message"]["content"]
                     else:
                         error_text = await response.text()
-                        print(f"❌ Groq API error {response.status}: {error_text}")
+                        logger.error(f"Groq API error {response.status}: {error_text}")
                         return "I'm experiencing technical difficulties. Please try again later."
                         
         except Exception as e:
-            print(f"❌ Error generating response: {e}")
+            logger.error(f"Error generating response: {e}")
             return "I'm sorry, I encountered an error. Please try again."
     
     async def chat(self, query: str) -> Dict[str, Any]:

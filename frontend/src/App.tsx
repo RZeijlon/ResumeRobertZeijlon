@@ -1,13 +1,11 @@
 import './App.css'
-import { FaBars, FaTimes } from 'react-icons/fa'
 import MatrixBackground from './MatrixBackground'
 import ChatBot from './ChatBot'
 import { useState, useEffect } from 'react'
-import { useContentManager } from './hooks/useContentManager'
-import { useThemeManager } from './hooks/useThemeManager'
+import { useContent } from './contexts/ContentContext'
+import { useTheme } from './contexts/ThemeContext'
 import DynamicSection from './components/DynamicSection'
-import SimpleThemeSwitcher from './components/SimpleThemeSwitcher'
-import AccessibilityMenu from './components/AccessibilityMenu'
+import Header from './components/layout/Header'
 
 function App() {
   const [isChatOpen, setIsChatOpen] = useState(false)
@@ -15,10 +13,7 @@ function App() {
   const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [useFullscreenChat, setUseFullscreenChat] = useState(false)
 
-  // Load content and theme management
-  const contentManager = useContentManager()
-  const themeManager = useThemeManager(contentManager.themeConfig)
-
+  // Use Context hooks
   const {
     siteConfig,
     layoutConfig,
@@ -27,11 +22,10 @@ function App() {
     loading,
     error,
     getContentByPath,
-    getContentsByPaths,
-    getNavbarItems
-  } = contentManager
+    getContentsByPaths
+  } = useContent()
 
-  const { currentTheme, getCurrentThemeConfig } = themeManager
+  const { currentTheme, getCurrentThemeConfig } = useTheme()
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -103,7 +97,6 @@ function App() {
   }
 
   const currentThemeConfig = getCurrentThemeConfig()
-  const navbarItems = getNavbarItems()
 
   // Determine app classes
   const appClasses = [
@@ -123,78 +116,13 @@ function App() {
       
       {/* Skip to main content link */}
       <a href="#main" className="skip-link">Skip to main content</a>
-      
-      <header className="header">
-        <nav className="nav" role="navigation" aria-label="Main navigation">
-          <div className="nav-left">
-            <img 
-              src="/page_content/assets/images/profile.jpg" 
-              alt={personalInfo.name} 
-              className="profile-image" 
-            />
-            <AccessibilityMenu themeManager={themeManager} />
-          </div>
-          
-          <div className="nav-content">
-            {!(showMobileMenu && isMobile) && <h1>{personalInfo.name}</h1>}
-            
-            {/* Desktop Navigation */}
-            <ul className="nav-links desktop-nav">
-              {navbarItems.map((item) => (
-                <li key={item.id}>
-                  <a href={`#${item.id}`}>{item.label}</a>
-                </li>
-              ))}
-              {siteConfig.features.chatBot.enabled && (
-                <li>
-                  <button className="chat-nav-button" onClick={openChat}>
-                    Chat
-                  </button>
-                </li>
-              )}
-              <li className="theme-switcher-nav">
-                <SimpleThemeSwitcher themeManager={themeManager} />
-              </li>
-            </ul>
-            
-            {/* Mobile Hamburger Menu */}
-            <button 
-              className="mobile-menu-toggle"
-              onClick={() => setShowMobileMenu(!showMobileMenu)}
-              aria-label="Toggle navigation menu"
-              aria-expanded={showMobileMenu}
-            >
-              {showMobileMenu ? <FaTimes /> : <FaBars />}
-            </button>
-            
-            {/* Mobile Navigation Menu */}
-            {showMobileMenu && (
-              <ul className="nav-links mobile-nav">
-                {navbarItems.map((item) => (
-                  <li key={item.id}>
-                    <a 
-                      href={`#${item.id}`} 
-                      onClick={() => setShowMobileMenu(false)}
-                    >
-                      {item.label}
-                    </a>
-                  </li>
-                ))}
-                {siteConfig.features.chatBot.enabled && (
-                  <li>
-                    <button className="chat-nav-button" onClick={openChat}>
-                      Chat
-                    </button>
-                  </li>
-                )}
-                <li className="theme-switcher-mobile">
-                  <SimpleThemeSwitcher themeManager={themeManager} showLabel={true} />
-                </li>
-              </ul>
-            )}
-          </div>
-        </nav>
-      </header>
+
+      <Header
+        isMobile={isMobile}
+        showMobileMenu={showMobileMenu}
+        setShowMobileMenu={setShowMobileMenu}
+        onOpenChat={openChat}
+      />
 
       <main id="main" role="main">
         {layoutConfig.layout.sections.map((section) => {

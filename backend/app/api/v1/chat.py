@@ -2,16 +2,18 @@
 Chat and RAG API endpoints
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 import uuid
 from datetime import datetime
 import os
+import traceback
 
-from app.models.chat import ChatRequest, ChatResponse
-from app.services.content_service import content_service
+from app.schemas import ChatRequest, ChatResponse
 from app.services.rag_service import rag_service
-from app.core.config import settings
+from app.core.logging import get_logger
+from app.core.exceptions import RAGServiceError, ConfigurationError
 
+logger = get_logger(__name__)
 router = APIRouter()
 
 
@@ -20,81 +22,75 @@ async def chat_message(request: ChatRequest):
     """
     Process chat message with RAG support
     """
-    print(f"🔥 ===== CHAT REQUEST START ===== 🔥")
-    print(f"📝 Request: {request.dict()}")
-    print(f"🆔 User Message: '{request.message}'")
-    
+    logger.info(f"Chat request received: message='{request.message[:50]}...'")
+
     try:
         # Generate conversation ID if not provided
         conversation_id = request.conversation_id or str(uuid.uuid4())
-        print(f"🆔 Conversation ID: {conversation_id}")
-        
+        logger.debug(f"Conversation ID: {conversation_id}")
+
         # Check if RAG is enabled and API keys are available
         rag_enabled = (
-            request.use_rag and 
+            request.use_rag and
             os.getenv("RAG_ENABLED", "false").lower() == "true" and
             (os.getenv("GROQ_API_KEY") or os.getenv("OPENAI_API_KEY"))
         )
-        
-        print(f"🧠 RAG Status Check:")
-        print(f"   - request.use_rag: {request.use_rag}")
-        print(f"   - RAG_ENABLED env: {os.getenv('RAG_ENABLED', 'not set')}")
-        print(f"   - GROQ_API_KEY present: {bool(os.getenv('GROQ_API_KEY'))}")
-        print(f"   - OPENAI_API_KEY present: {bool(os.getenv('OPENAI_API_KEY'))}")
-        print(f"   - Final rag_enabled: {rag_enabled}")
-        
+
+        logger.debug(f"RAG enabled: {rag_enabled} (request.use_rag={request.use_rag}, "
+                    f"GROQ={bool(os.getenv('GROQ_API_KEY'))}, "
+                    f"OpenAI={bool(os.getenv('OPENAI_API_KEY'))})")
+
         if rag_enabled:
             try:
-                print(f"🧠 Initializing RAG service...")
+                logger.info("Initializing RAG service...")
                 await rag_service.initialize()
-                print(f"✅ RAG service initialized successfully")
-                
-                print(f"🔍 Processing RAG query: '{request.message}'")
+
+                logger.info(f"Processing RAG query: '{request.message[:100]}...'")
                 rag_result = await rag_service.chat(request.message)
-                print(f"✅ RAG response generated:")
-                print(f"   - Response length: {len(rag_result.get('response', ''))}")
-                print(f"   - Sources found: {len(rag_result.get('sources', []))}")
-                print(f"   - Context used: {rag_result.get('context_used', False)}")
-                
+
+                logger.info(f"RAG response generated: {len(rag_result.get('response', ''))} chars, "
+                           f"{len(rag_result.get('sources', []))} sources")
+
                 response = ChatResponse(
                     message=rag_result["response"],
                     conversation_id=conversation_id,
                     sources=rag_result.get("sources", []),
                     timestamp=datetime.now()
                 )
-                print(f"🎉 ===== CHAT REQUEST SUCCESS (RAG) ===== 🎉")
                 return response
-                
+
             except Exception as e:
-                print(f"💥 RAG ERROR: {str(e)}")
-                print(f"📚 Error details: {e.__class__.__name__}: {str(e)}")
-                import traceback
-                print(f"🔥 Full traceback:\n{traceback.format_exc()}")
-                print(f"⚠️  Falling back to basic response...")
-                # Fall back to basic response if RAG fails
-                response_text = generate_basic_response(request.message)
+                logger.error(f"RAG error: {e.__class__.__name__}: {str(e)}")
+                logger.debug(f"RAG traceback: {traceback.format_exc()}")
+                # Raise RAG error instead of falling back
+                raise RAGServiceError(
+                    message=f"Failed to process RAG query: {str(e)}",
+                    details={"original_error": str(e), "error_type": e.__class__.__name__}
+                )
         else:
-            print(f"🔧 Using basic response (RAG disabled)")
-            # Use basic keyword-based response
+            logger.info("Using basic response (RAG disabled)")
             response_text = generate_basic_response(request.message)
-        
+
         response = ChatResponse(
             message=response_text,
             conversation_id=conversation_id,
             sources=[],
             timestamp=datetime.now()
         )
-        print(f"🎉 ===== CHAT REQUEST SUCCESS (BASIC) ===== 🎉")
+        logger.info("Chat request completed successfully")
         return response
-    
+
+    except RAGServiceError:
+        # Re-raise RAG errors (already handled)
+        raise
     except Exception as e:
-        print(f"💥 ===== CHAT REQUEST FAILED ===== 💥")
-        print(f"❌ Unhandled error: {str(e)}")
-        print(f"🔍 Error type: {e.__class__.__name__}")
-        import traceback
-        print(f"🔥 Full traceback:\n{traceback.format_exc()}")
-        print(f"💥 ===== END ERROR ===== 💥")
-        raise HTTPException(status_code=500, detail=f"Chat processing failed: {str(e)}")
+        logger.error(f"Chat request failed: {e.__class__.__name__}: {str(e)}")
+        logger.debug(f"Full traceback: {traceback.format_exc()}")
+        # Wrap unexpected errors
+        raise RAGServiceError(
+            message="Chat processing failed",
+            details={"error": str(e), "error_type": e.__class__.__name__}
+        )
 
 
 @router.get("/context/{conversation_id}")
@@ -121,18 +117,21 @@ async def initialize_rag_system():
     try:
         # Initialize the RAG service
         await rag_service.initialize()
-        
+
         # Process all content and generate embeddings
         stats = await rag_service.process_content_directory(force_refresh=True)
-        
+
         return {
             "status": "success",
             "message": "RAG system initialized successfully",
             "stats": stats
         }
-    
+
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"RAG initialization failed: {str(e)}")
+        raise RAGServiceError(
+            message="RAG initialization failed",
+            details={"error": str(e), "error_type": e.__class__.__name__}
+        )
 
 
 @router.get("/rag-status")

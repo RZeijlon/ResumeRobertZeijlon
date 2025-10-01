@@ -2,38 +2,44 @@
 FastAPI main application entry point for Portfolio CMS & RAG System
 """
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
-import os
 from pathlib import Path
 
 from app.api.v1.content import router as content_router
 from app.api.v1.chat import router as chat_router
 from app.api.v1.theme import router as theme_router
 from app.core.config import settings
+from app.core.logging import setup_logging, get_logger
+from app.core.error_handlers import register_exception_handlers
+from app.middleware import ErrorLoggingMiddleware
+
+# Setup logging
+setup_logging(level="INFO")
+logger = get_logger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan events"""
     # Startup
-    print("🚀 Portfolio Backend starting up...")
-    print(f"📁 Content path: {settings.CONTENT_PATH}")
-    print(f"🎨 Frontend URL: {settings.FRONTEND_URL}")
-    
+    logger.info("Portfolio Backend starting up...")
+    logger.info(f"Content path: {settings.CONTENT_PATH}")
+    logger.info(f"Frontend URL: {settings.FRONTEND_URL}")
+
     # Ensure content directory exists
     content_path = Path(settings.CONTENT_PATH)
     if not content_path.exists():
-        print(f"❌ Content directory not found: {content_path}")
+        logger.warning(f"Content directory not found: {content_path}")
     else:
-        print(f"✅ Content directory found: {content_path}")
-    
+        logger.info(f"Content directory found: {content_path}")
+
     yield
-    
+
     # Shutdown
-    print("🛑 Portfolio Backend shutting down...")
+    logger.info("Portfolio Backend shutting down...")
 
 
 # Create FastAPI app
@@ -44,13 +50,16 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# Add error logging middleware (must be added before CORS)
+app.add_middleware(ErrorLoggingMiddleware)
+
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         settings.FRONTEND_URL,
         "http://localhost:3000",
-        "http://localhost:5173", 
+        "http://localhost:5173",
         "http://localhost:5174",
         "http://127.0.0.1:5173",
         "http://127.0.0.1:5174"
@@ -59,6 +68,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Register exception handlers
+register_exception_handlers(app)
 
 # Mount static files for page_content
 if Path(settings.CONTENT_PATH).exists():

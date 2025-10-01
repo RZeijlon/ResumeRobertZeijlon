@@ -9,9 +9,13 @@ from typing import List, Dict, Any, Optional, Tuple
 from pathlib import Path
 import aiohttp
 import json
+import traceback
 from dataclasses import dataclass
 
 from app.core.config import settings
+from app.core.logging import get_logger
+
+logger = get_logger(__name__)
 
 
 @dataclass
@@ -85,7 +89,7 @@ class EmbeddingService:
             
         # Fallback to OpenAI if MiniLM fails and API key is available
         if not self.openai_api_key:
-            print("⚠️  No embedding method available (no MiniLM model and no OpenAI API key)")
+            logger.warning("No embedding method available (no MiniLM model and no OpenAI API key)")
             return None
         
         try:
@@ -111,11 +115,11 @@ class EmbeddingService:
                         return data["data"][0]["embedding"]
                     else:
                         error_text = await response.text()
-                        print(f"❌ OpenAI API error {response.status}: {error_text}")
+                        logger.error(f"OpenAI API error {response.status}: {error_text}")
                         return None
                         
         except Exception as e:
-            print(f"❌ Error generating embedding: {e}")
+            logger.error(f"Error generating embedding: {e}")
             return None
     
     async def _generate_minilm_embedding(self, text: str) -> Optional[List[float]]:
@@ -126,7 +130,7 @@ class EmbeddingService:
             
             # Initialize model if not already done
             if not hasattr(self, '_minilm_model'):
-                print("🔄 Loading FastEmbed MiniLM model: BAAI/bge-small-en-v1.5")
+                logger.info("Loading FastEmbed MiniLM model: BAAI/bge-small-en-v1.5")
                 loop = asyncio.get_event_loop()
                 
                 # Use a lighter model available in FastEmbed
@@ -135,17 +139,17 @@ class EmbeddingService:
                     lambda: TextEmbedding(model_name="BAAI/bge-small-en-v1.5")
                 )
                 self.embedding_dimension = 384  # BGE-small dimension
-                print("✅ FastEmbed model loaded successfully")
-                print(f"   - Model: BAAI/bge-small-en-v1.5")
-                print(f"   - Embedding dimension: {self.embedding_dimension}")
-                print(f"   - CPU-optimized ONNX runtime")
+                logger.info("FastEmbed model loaded successfully")
+                
+                
+                
             
             # Generate embedding
             clean_text = text.replace("\n", " ").strip()
             if not clean_text:
                 return None
                 
-            print(f"🧮 Generating FastEmbed embedding for text: '{clean_text[:100]}{'...' if len(clean_text) > 100 else ''}'")
+            logger.debug(f"Generating FastEmbed embedding for text (length={len(clean_text)})")
             
             loop = asyncio.get_event_loop()
             embeddings = await loop.run_in_executor(
@@ -154,17 +158,17 @@ class EmbeddingService:
             )
             
             embedding_list = embeddings[0].tolist()
-            print(f"✅ Generated FastEmbed embedding: dimension={len(embedding_list)}")
+            logger.debug(f"Generated FastEmbed embedding: dimension={len(embedding_list)}")
             
             return embedding_list
             
         except ImportError:
-            print("⚠️  FastEmbed not available, will try OpenAI API")
+            logger.warning("FastEmbed not available, will try OpenAI API")
             return None
         except Exception as e:
-            print(f"⚠️  FastEmbed embedding failed: {e}, will try OpenAI API")
+            logger.warning(f"FastEmbed embedding failed: {e}, will try OpenAI API")
             import traceback
-            print(f"🔥 Full traceback:\n{traceback.format_exc()}")
+            logger.debug(f"Full traceback: {traceback.format_exc()}")
             return None
     
     async def generate_embeddings_batch(self, texts: List[str]) -> List[Optional[List[float]]]:
@@ -194,7 +198,7 @@ class EmbeddingService:
                             key, value = line.split(':', 1)
                             metadata[key.strip()] = value.strip().strip('"\'')
             except Exception as e:
-                print(f"⚠️  Error parsing frontmatter in {file_path}: {e}")
+                logger.warning(f"Error parsing frontmatter in {file_path}: {e}")
         
         # Infer section type from file path
         if 'sections/' in file_path:

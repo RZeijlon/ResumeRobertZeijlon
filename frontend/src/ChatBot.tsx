@@ -1,14 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { FaComments, FaTimes, FaPaperPlane, FaMicrophone, FaStop } from 'react-icons/fa';
 import './ChatBot.css';
-import type { ContentItem } from './hooks/useContentManager';
-
-interface Message {
-  id: string;
-  content: string;
-  role: 'user' | 'assistant';
-  timestamp: Date;
-}
+import type { ContentItem, Message } from './types';
 
 interface ChatBotProps {
   onChatToggle?: (isOpen: boolean) => void;
@@ -35,13 +28,6 @@ const ChatBot = ({ onChatToggle, welcomeMessage }: ChatBotProps) => {
   // In development, use empty string to leverage Vite proxy
   // In production, use environment variable or fallback to localhost
   const API_BASE_URL = import.meta.env.PROD ? (import.meta.env.VITE_API_URL || 'http://localhost:8000') : '';
-  
-  console.log('ChatBot Environment:', {
-    isDev: !import.meta.env.PROD,
-    isProd: import.meta.env.PROD,
-    viteApiUrl: import.meta.env.VITE_API_URL,
-    apiBaseUrl: API_BASE_URL
-  });
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -87,8 +73,8 @@ const ChatBot = ({ onChatToggle, welcomeMessage }: ChatBotProps) => {
   useEffect(() => {
     if (!isMobile) return;
 
-    let initialHeight = window.innerHeight;
-    let visualViewport = window.visualViewport;
+    const initialHeight = window.innerHeight;
+    const visualViewport = window.visualViewport;
 
     const handleResize = () => {
       const currentHeight = window.innerHeight;
@@ -149,13 +135,6 @@ const ChatBot = ({ onChatToggle, welcomeMessage }: ChatBotProps) => {
         use_rag: true // Enable RAG for intelligent responses
       };
 
-      console.log('🚀 Sending chat request:', {
-        url: requestUrl,
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: requestBody
-      });
-
       const response = await fetch(requestUrl, {
         method: 'POST',
         headers: {
@@ -164,25 +143,13 @@ const ChatBot = ({ onChatToggle, welcomeMessage }: ChatBotProps) => {
         body: JSON.stringify(requestBody)
       });
 
-      console.log('📡 Response received:', {
-        status: response.status,
-        statusText: response.statusText,
-        ok: response.ok,
-        headers: Object.fromEntries(response.headers.entries())
-      });
-
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('❌ Backend request failed:', {
-          status: response.status,
-          statusText: response.statusText,
-          errorBody: errorText
-        });
-        throw new Error(`Backend request failed: ${response.status} ${response.statusText} - ${errorText}`);
+        console.error('Backend request failed:', response.status, response.statusText, errorText);
+        throw new Error(`Backend request failed: ${response.status} ${response.statusText}`);
       }
 
       const data = await response.json();
-      console.log('✅ Chat response data:', data);
 
       // Update conversation ID if we got a new one
       if (data.conversation_id && !conversationId) {
@@ -198,24 +165,15 @@ const ChatBot = ({ onChatToggle, welcomeMessage }: ChatBotProps) => {
 
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
-      console.error('💥 Chat API Error:', {
-        error: error,
-        message: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined,
-        timestamp: new Date().toISOString(),
-        apiBaseUrl: API_BASE_URL,
-        requestMessage: messageToSend
-      });
+      console.error('Chat API Error:', error);
 
       let errorContent = 'I\'m experiencing technical difficulties. Please try again later.';
-      
+
       if (error instanceof Error) {
         if (error.message.includes('Failed to fetch')) {
           errorContent = 'Cannot connect to the chat service. Please check your network connection.';
-          console.error('🌐 Network Error: Failed to fetch - likely CORS or network issue');
         } else if (error.message.includes('Backend request failed')) {
           errorContent = 'The chat service returned an error. Please try again.';
-          console.error('🔧 Backend Error:', error.message);
         }
       }
       
@@ -253,9 +211,9 @@ const ChatBot = ({ onChatToggle, welcomeMessage }: ChatBotProps) => {
       };
 
       mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        await transcribeAudio(audioBlob);
-        
+        // const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        await transcribeAudio(/* audioBlob */);
+
         // Stop all tracks to release microphone
         stream.getTracks().forEach(track => track.stop());
       };
@@ -275,14 +233,14 @@ const ChatBot = ({ onChatToggle, welcomeMessage }: ChatBotProps) => {
     }
   };
 
-  const transcribeAudio = async (audioBlob: Blob) => {
+  const transcribeAudio = async (/* audioBlob: Blob */) => {
     setIsTranscribing(true);
-    
+
     try {
       // TODO: Implement speech transcription via backend API
       // This will be added when the backend transcription endpoint is ready
       alert('Speech transcription will be available soon via the backend API!');
-      
+
     } catch (error) {
       console.error('Error transcribing audio:', error);
       alert('Failed to transcribe audio. Please try again.');

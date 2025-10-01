@@ -1,17 +1,15 @@
 import React from 'react'
 import { FaMoon, FaSun } from 'react-icons/fa'
-import { useThemeManager } from '../hooks/useThemeManager'
+import { useTheme } from '../../contexts'
 
 interface SimpleThemeSwitcherProps {
-  themeManager: ReturnType<typeof useThemeManager>
   showLabel?: boolean
 }
 
-export const SimpleThemeSwitcher: React.FC<SimpleThemeSwitcherProps> = ({ 
-  themeManager, 
-  showLabel = false 
+export const SimpleThemeSwitcher: React.FC<SimpleThemeSwitcherProps> = ({
+  showLabel = false
 }) => {
-  const { isDarkMode, toggleDarkMode } = themeManager
+  const { isDarkMode, toggleDarkMode } = useTheme()
 
   return (
     <div className="simple-theme-switcher">

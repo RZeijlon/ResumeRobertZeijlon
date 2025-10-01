@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { createContext, useContext, useState, useEffect } from 'react'
+import type { ReactNode } from 'react'
 import { parseFrontmatter } from '../utils/frontmatter'
 import type {
   ContentItem,
@@ -10,10 +11,60 @@ import type {
   NavbarItem
 } from '../types'
 
-// Re-export types for backwards compatibility
-export type { ContentItem, SiteConfig, ThemeConfig, LayoutConfig, DesignConfig, PersonalInfo, NavbarItem }
+interface ContentContextType {
+  siteConfig: SiteConfig | null
+  themeConfig: ThemeConfig | null
+  layoutConfig: LayoutConfig | null
+  designConfig: DesignConfig | null
+  personalInfo: PersonalInfo | null
+  content: Record<string, ContentItem>
+  loading: boolean
+  error: string | null
+  getContentByPath: (path: string) => ContentItem | null
+  getContentsByPaths: (paths: string[]) => ContentItem[]
+  getNavbarItems: () => NavbarItem[]
+}
 
-export const useContentManager = () => {
+const ContentContext = createContext<ContentContextType | undefined>(undefined)
+
+export const useContent = () => {
+  const context = useContext(ContentContext)
+  if (!context) {
+    throw new Error('useContent must be used within a ContentProvider')
+  }
+  return context
+}
+
+const loadJsonFile = async (path: string) => {
+  const response = await fetch(path)
+  if (!response.ok) {
+    throw new Error(`Failed to load ${path}: ${response.statusText}`)
+  }
+  return await response.json()
+}
+
+const loadMarkdownFile = async (path: string): Promise<ContentItem> => {
+  const response = await fetch(path)
+  if (!response.ok) {
+    throw new Error(`Failed to load ${path}: ${response.statusText}`)
+  }
+  const rawContent = await response.text()
+  const { data: metadata, content: markdownContent } = parseFrontmatter(rawContent)
+
+  return {
+    id: path.replace(/^.*\//, '').replace('.md', ''),
+    content: markdownContent,
+    metadata,
+    rawContent
+  }
+}
+
+const loadMultipleMarkdownFiles = async (paths: string[]): Promise<ContentItem[]> => {
+  const promises = paths.map(path => loadMarkdownFile(`/page_content/${path}`))
+  return Promise.all(promises)
+}
+
+export const ContentProvider = ({ children }: { children: ReactNode }) => {
   const [siteConfig, setSiteConfig] = useState<SiteConfig | null>(null)
   const [themeConfig, setThemeConfig] = useState<ThemeConfig | null>(null)
   const [layoutConfig, setLayoutConfig] = useState<LayoutConfig | null>(null)
@@ -22,45 +73,6 @@ export const useContentManager = () => {
   const [content, setContent] = useState<Record<string, ContentItem>>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-
-  const loadJsonFile = async (path: string) => {
-    try {
-      const response = await fetch(path)
-      if (!response.ok) {
-        throw new Error(`Failed to load ${path}: ${response.statusText}`)
-      }
-      return await response.json()
-    } catch (err) {
-      console.error(`Error loading ${path}:`, err)
-      throw err
-    }
-  }
-
-  const loadMarkdownFile = async (path: string): Promise<ContentItem> => {
-    try {
-      const response = await fetch(path)
-      if (!response.ok) {
-        throw new Error(`Failed to load ${path}: ${response.statusText}`)
-      }
-      const rawContent = await response.text()
-      const { data: metadata, content: markdownContent } = parseFrontmatter(rawContent)
-      
-      return {
-        id: path.replace(/^.*\//, '').replace('.md', ''),
-        content: markdownContent,
-        metadata,
-        rawContent
-      }
-    } catch (err) {
-      console.error(`Error loading markdown ${path}:`, err)
-      throw err
-    }
-  }
-
-  const loadMultipleMarkdownFiles = async (paths: string[]): Promise<ContentItem[]> => {
-    const promises = paths.map(path => loadMarkdownFile(`/page_content/${path}`))
-    return Promise.all(promises)
-  }
 
   useEffect(() => {
     const loadAllContent = async () => {
@@ -76,7 +88,6 @@ export const useContentManager = () => {
           loadJsonFile('/page_content/config/design.json'),
           loadJsonFile('/page_content/personal/contact-info.json')
         ])
-
 
         setSiteConfig(site)
         setThemeConfig(theme)
@@ -103,7 +114,7 @@ export const useContentManager = () => {
         }
 
         const results = await Promise.all(contentPromises)
-        
+
         // Process results and build content map
         results.forEach((result) => {
           if (Array.isArray(result)) {
@@ -149,7 +160,7 @@ export const useContentManager = () => {
       .sort((a, b) => a.order - b.order)
   }
 
-  return {
+  const value: ContentContextType = {
     siteConfig,
     themeConfig,
     layoutConfig,
@@ -162,4 +173,6 @@ export const useContentManager = () => {
     getContentsByPaths,
     getNavbarItems
   }
+
+  return <ContentContext.Provider value={value}>{children}</ContentContext.Provider>
 }
