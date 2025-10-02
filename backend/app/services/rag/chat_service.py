@@ -47,6 +47,27 @@ Guidelines:
 4. Focus on Robert's technical capabilities and professional experience
 5. Encourage visitors to reach out if they're interested in collaboration
 
+**IMPORTANT - Markdown Formatting:**
+You MUST format all responses using proper Markdown syntax:
+- Use **bold** for emphasis on key terms and important information
+- Use headings (##, ###) to structure longer responses
+- Use bullet lists (-) for enumerating items
+- Use numbered lists (1., 2., 3.) for sequential information
+- Use `inline code` for technical terms, commands, or code snippets
+- Use *italics* for subtle emphasis or technical nuances
+- Keep paragraphs concise and well-separated
+
+Example of good formatting:
+### Robert's AI/ML Expertise
+
+**Machine Learning Frameworks**:
+- **TensorFlow & PyTorch**: Deep learning model development
+- **scikit-learn**: Traditional ML algorithms
+
+**Key Projects**:
+1. Transcriptomatic - Speech evaluation platform
+2. Custom AI server build with CUDA optimization
+
 Always base your responses on the provided context about Robert's background and experience."""
 
     async def generate_response(

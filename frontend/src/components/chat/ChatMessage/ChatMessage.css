@@ -20,6 +20,15 @@
   padding: 0.75rem 1rem;
   border-radius: 1rem;
   word-wrap: break-word;
+  line-height: 1.6;
+}
+
+/* Remove pre-wrap for assistant messages with markdown */
+.message.assistant .message-content {
+  white-space: normal;
+}
+
+.message.user .message-content {
   white-space: pre-wrap;
 }
 
@@ -42,4 +51,153 @@
   color: var(--text-muted, #666);
   margin-top: 0.25rem;
   padding: 0 0.5rem;
+}
+
+/* Markdown styling for chat messages */
+.message-content .chat-heading-1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0.75rem 0 0.5rem 0;
+  color: var(--primary-color);
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 0.25rem;
+}
+
+.message-content .chat-heading-2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0.5rem 0 0.4rem 0;
+  color: var(--text-primary);
+}
+
+.message-content .chat-heading-3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0.4rem 0 0.3rem 0;
+  color: var(--text-primary);
+}
+
+.message-content .chat-heading-4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0.3rem 0 0.25rem 0;
+  color: var(--text-secondary);
+}
+
+.message-content .chat-paragraph {
+  margin: 0.5rem 0;
+  line-height: 1.6;
+}
+
+.message-content .chat-paragraph:first-child {
+  margin-top: 0;
+}
+
+.message-content .chat-paragraph:last-child {
+  margin-bottom: 0;
+}
+
+.message-content .chat-list,
+.message-content .chat-list-ordered {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.message-content .chat-list-item {
+  margin: 0.25rem 0;
+  line-height: 1.5;
+}
+
+.message-content .chat-bold {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.message-content .chat-italic {
+  font-style: italic;
+}
+
+.message-content .chat-code-inline {
+  background: var(--bg-tertiary);
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.25rem;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+  border: 1px solid var(--border-color);
+}
+
+.message-content .chat-code-block {
+  display: block;
+  background: var(--bg-tertiary);
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+  border: 1px solid var(--border-color);
+  overflow-x: auto;
+  margin: 0.5rem 0;
+}
+
+.message-content .chat-blockquote {
+  border-left: 3px solid var(--primary-color);
+  padding-left: 1rem;
+  margin: 0.5rem 0;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.message-content .chat-link {
+  color: var(--primary-color);
+  text-decoration: underline;
+  transition: opacity 0.2s;
+}
+
+.message-content .chat-link:hover {
+  opacity: 0.8;
+}
+
+/* Table styling */
+.message-content .chat-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0;
+  font-size: 0.9em;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.message-content .chat-table-head {
+  background: var(--bg-tertiary);
+}
+
+.message-content .chat-table-header {
+  padding: 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-primary);
+  border-bottom: 2px solid var(--border-color);
+}
+
+.message-content .chat-table-cell {
+  padding: 0.65rem 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+.message-content .chat-table-row:last-child .chat-table-cell {
+  border-bottom: none;
+}
+
+.message-content .chat-table-row:hover {
+  background: var(--bg-tertiary);
+}
+
+/* Adjust first/last child margins */
+.message-content > *:first-child {
+  margin-top: 0;
+}
+
+.message-content > *:last-child {
+  margin-bottom: 0;
 }
