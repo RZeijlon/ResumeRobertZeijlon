@@ -19,9 +19,11 @@ export interface CustomTheme {
 }
 
 export const useThemeManager = (themeConfig: ThemeConfig | null) => {
-  const [currentTheme, setCurrentTheme] = useState<ThemeMode>('default-dark')
+  // Detect system preference for initial state
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+  const [currentTheme, setCurrentTheme] = useState<ThemeMode>(prefersDark ? 'default-dark' : 'default-light')
   const [customTheme, setCustomTheme] = useState<CustomTheme | null>(null)
-  const [isDarkMode, setIsDarkMode] = useState(true)
+  const [isDarkMode, setIsDarkMode] = useState(prefersDark)
   const [animationsEnabled, setAnimationsEnabled] = useState(true)
 
   // Load theme from localStorage on mount
