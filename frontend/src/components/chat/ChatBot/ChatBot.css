@@ -21,8 +21,12 @@
 }
 
 .chat-toggle svg {
-  width: 24px;
-  height: 24px;
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px;
+  min-height: 24px;
+  fill: currentColor;
+  display: block;
 }
 
 .chat-toggle:hover {
