@@ -40,17 +40,95 @@ class EmbeddingService:
     def chunk_content(self, content: str, file_path: str, metadata: Dict[str, Any]) -> List[ContentChunk]:
         """
         Chunk content into smaller pieces for better embedding and retrieval
+        Uses smart chunking for Q&A knowledge base files to keep questions with answers
         """
-        # Simple chunking by paragraphs and sections
+        # Use smart Q&A chunking for knowledge base files
+        if 'rag-knowledge-base/' in file_path:
+            return self._chunk_qa_content(content, file_path, metadata)
+
+        # Default chunking for other files
+        return self._chunk_by_paragraphs(content, file_path, metadata)
+
+    def _chunk_qa_content(self, content: str, file_path: str, metadata: Dict[str, Any]) -> List[ContentChunk]:
+        """
+        Smart chunking for Q&A knowledge base files
+        Keeps each Q&A pair together as a single chunk
+        """
         chunks = []
-        
+        chunk_index = 0
+
+        # Split by Q### pattern (question headers like ### Q11:, ### Q12:)
+        import re
+        # Split content while keeping the delimiter (question header)
+        parts = re.split(r'(###\s+Q\d+:.*?)(?=\n)', content)
+
+        current_chunk = ""
+        current_question = None
+
+        for part in parts:
+            part = part.strip()
+            if not part:
+                continue
+
+            # Check if this is a question header
+            if re.match(r'###\s+Q\d+:', part):
+                # Save previous Q&A chunk if exists
+                if current_chunk and current_question:
+                    chunk_id = f"{metadata.get('id', 'unknown')}_{chunk_index}"
+                    chunks.append(ContentChunk(
+                        content_id=chunk_id,
+                        file_path=file_path,
+                        content=f"{current_question}\n\n{current_chunk}".strip(),
+                        metadata={
+                            **metadata,
+                            "chunk_index": chunk_index,
+                            "question": current_question
+                        },
+                        chunk_index=chunk_index
+                    ))
+                    chunk_index += 1
+
+                # Start new Q&A pair
+                current_question = part
+                current_chunk = ""
+            else:
+                # Accumulate answer content
+                current_chunk += "\n\n" + part if current_chunk else part
+
+        # Add the last Q&A chunk
+        if current_chunk and current_question:
+            chunk_id = f"{metadata.get('id', 'unknown')}_{chunk_index}"
+            chunks.append(ContentChunk(
+                content_id=chunk_id,
+                file_path=file_path,
+                content=f"{current_question}\n\n{current_chunk}".strip(),
+                metadata={
+                    **metadata,
+                    "chunk_index": chunk_index,
+                    "question": current_question
+                },
+                chunk_index=chunk_index
+            ))
+
+        # If no Q&A patterns found, fall back to paragraph chunking
+        if not chunks:
+            return self._chunk_by_paragraphs(content, file_path, metadata)
+
+        return chunks
+
+    def _chunk_by_paragraphs(self, content: str, file_path: str, metadata: Dict[str, Any]) -> List[ContentChunk]:
+        """
+        Default paragraph-based chunking for non-Q&A content
+        """
+        chunks = []
+
         # Split by double newlines (paragraphs)
         paragraphs = content.split('\n\n')
-        
+
         current_chunk = ""
         chunk_index = 0
         max_chunk_size = 1000  # Characters
-        
+
         for paragraph in paragraphs:
             # If adding this paragraph would exceed max size, create a new chunk
             if len(current_chunk) + len(paragraph) > max_chunk_size and current_chunk:
@@ -66,7 +144,7 @@ class EmbeddingService:
                 chunk_index += 1
             else:
                 current_chunk += "\n\n" + paragraph if current_chunk else paragraph
-        
+
         # Add the last chunk
         if current_chunk.strip():
             chunk_id = f"{metadata.get('id', 'unknown')}_{chunk_index}"
@@ -77,7 +155,7 @@ class EmbeddingService:
                 metadata={**metadata, "chunk_index": chunk_index},
                 chunk_index=chunk_index
             ))
-        
+
         return chunks
     
     async def generate_embedding(self, text: str) -> Optional[List[float]]:
