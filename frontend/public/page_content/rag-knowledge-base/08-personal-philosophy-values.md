@@ -81,11 +81,27 @@
 
 ### Q123: Relationship & Community Perspective
 **How do you view relationships and community in your personal and professional life?**
-- Relationship building and maintenance philosophy
-- Community contribution beliefs
-- Support system development
-- Networking vs. genuine relationship building
-- Collaboration and collective achievement values
+
+**Deep Commitment to Long-Term Relationships**
+I'm someone who thrives in long-term, mutually beneficial relationships - both personally and professionally. I've been with my partner for 17 years (together since 2008, married since 2019), which speaks to my fundamental approach to commitment. I'm committed to a fault - I value depth, consistency, and the compound benefits that come from sustained collaboration and partnership over time. This same philosophy extends to my professional life where I seek to build lasting working relationships rather than transactional connections.
+
+**Reciprocity and Mutual Appreciation**
+While I'm deeply committed, these relationships need to be genuinely reciprocal. I need to feel appreciated and wanted for my contributions - it absolutely must go both ways. I invest heavily in relationships where there's mutual respect, shared growth, and genuine appreciation for what each person brings. This isn't about keeping score, but rather ensuring that the relationship provides value and fulfillment to everyone involved.
+
+**Quality Over Quantity in Relationships**
+I strongly prefer maintaining a smaller number of genuine, deep relationships rather than appearing to know everyone. I actively work toward cultivating meaningful connections with substance rather than building large networks of superficial acquaintances. Both personally and professionally, I gravitate toward deep, intellectually stimulating conversations that provide substance to my life and work environment. I have little patience for small talk - I want conversations that matter, that challenge thinking, and that create real understanding between people.
+
+**Community Contribution Through Open Collaboration**
+I fundamentally believe that everything is better when everyone can participate and contribute. While I'm early in my career and haven't yet made major commits to open source projects, I have several that I genuinely admire and want to support as I progress. My vision for community contribution centers on democratizing access to technology and knowledge - making AI and advanced technical capabilities accessible to broader populations rather than concentrating them in the hands of a few wealthy corporations or individuals.
+
+**Critical Perspective on Traditional Networking**
+I genuinely dislike traditional networking and believe it can be harmful in certain contexts - particularly in Sweden where it's challenging to end employment contracts, leading to situations where "who you know" can matter more than capability or merit. This networking-driven culture can create insider/outsider dynamics that prevent talented people from accessing opportunities. I prefer building relationships based on genuine shared interests, mutual respect, and collaborative potential rather than strategic career positioning.
+
+**Collaboration as the Path Forward**
+I'm convinced that working together is the only sustainable path forward in technology. We desperately need to move away from having 4-5 tech giants ruling the entire industry. True innovation and ethical technology development requires collaborative, community-driven approaches where diverse voices and perspectives shape the direction of technological advancement. My commitment to open-source solutions and self-hosted infrastructure reflects this belief - technology should serve communities, not just corporate shareholders.
+
+**Professional Relationship Philosophy**
+In work environments, I seek teams and collaborators who value deep technical discussions, mutual learning, and shared achievement over individual glory. I want to be part of professional communities where people genuinely support each other's growth, where knowledge sharing is the norm, and where collective success matters more than personal advancement. The relationships that energize me professionally are those where we're solving meaningful problems together and building something larger than any individual contribution.
 
 ### Q124: Success & Achievement Definition
 **How do you personally define success and achievement?**
