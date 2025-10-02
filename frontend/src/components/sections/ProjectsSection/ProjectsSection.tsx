@@ -10,6 +10,8 @@ interface ProjectsSectionProps {
 
 const ProjectsSection = ({ sectionId, content, contents }: ProjectsSectionProps) => {
   const title = content?.metadata.title || 'Featured Projects';
+  // Only show header for the main projects section, not for accomplishments
+  const showHeader = sectionId === 'project-cards';
 
   const renderProjectGrid = () => {
     if (!contents) return null;
@@ -56,9 +58,11 @@ const ProjectsSection = ({ sectionId, content, contents }: ProjectsSectionProps)
 
   return (
     <section id={sectionId} className="projects">
-      <div className="projects-header">
-        <h2>{title}</h2>
-      </div>
+      {showHeader && (
+        <div className="projects-header">
+          <h2>{title}</h2>
+        </div>
+      )}
       {renderProjectGrid()}
     </section>
   );
