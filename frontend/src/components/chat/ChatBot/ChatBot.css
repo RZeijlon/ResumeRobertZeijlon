@@ -20,6 +20,11 @@
   z-index: 1000;
 }
 
+.chat-toggle svg {
+  width: 24px;
+  height: 24px;
+}
+
 .chat-toggle:hover {
   background: var(--highlight-hover);
   transform: scale(1.05);
