@@ -9,22 +9,14 @@
         "navbar": false
       },
       {
-        "id": "accomplishments-featured",
+        "id": "accomplishments",
         "component": "ProjectGrid",
         "files": [
-          "components/accomplishments/rag-system.md"
-        ],
-        "width": "full",
-        "navbar": false
-      },
-      {
-        "id": "accomplishments-supporting",
-        "component": "ProjectGrid",
-        "files": [
+          "components/accomplishments/rag-system.md",
           "components/accomplishments/ai-server.md",
           "components/accomplishments/digital-sovereignty.md"
         ],
-        "width": "dynamic",
+        "width": "full",
         "navbar": false
       },
       {

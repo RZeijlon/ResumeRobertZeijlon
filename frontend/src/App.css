@@ -1097,6 +1097,11 @@ main {
     gap: 2.5rem;
   }
 
+  /* Make first accomplishment card span full width on tablet */
+  #accomplishments .project-grid .project-card:first-child {
+    grid-column: 1 / -1;
+  }
+
   .project-card {
     padding: var(--box-padding);
   }
