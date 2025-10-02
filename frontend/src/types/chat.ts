@@ -15,6 +15,7 @@ export interface Message {
   content: string;
   role: MessageRole;
   timestamp: Date;
+  sources?: ChatSource[];
 }
 
 /**
@@ -33,6 +34,7 @@ export interface ChatSource {
   content: string;
   file_path: string;
   similarity?: number;
+  metadata?: Record<string, unknown>;
 }
 
 /**

@@ -2,7 +2,7 @@
 Chat and RAG API endpoints
 """
 
-from fastapi import APIRouter
+from fastapi import APIRouter, UploadFile, File, HTTPException
 import uuid
 from datetime import datetime
 import os
@@ -10,6 +10,8 @@ import traceback
 
 from app.schemas import ChatRequest, ChatResponse
 from app.services.rag_service import rag_service
+from app.services.transcription_service import transcription_service
+from app.services.rag.chat_service import RateLimitError
 from app.core.logging import get_logger
 from app.core.exceptions import RAGServiceError, ConfigurationError
 
@@ -59,6 +61,31 @@ async def chat_message(request: ChatRequest):
                 )
                 return response
 
+            except RateLimitError as e:
+                logger.warning(f"Rate limit hit: {e.limit_type}")
+                # Create user-friendly message based on limit type
+                if e.limit_type in ["TPD", "RPD"]:
+                    user_message = (
+                        "🕐 I've reached my daily usage limit for AI responses. "
+                        "Please come back tomorrow, and I'll be happy to help! "
+                        "In the meantime, feel free to explore Robert's portfolio or reach out via email."
+                    )
+                else:  # TPM or RPM
+                    wait_time = e.retry_after or 60
+                    user_message = (
+                        f"⏳ I'm getting too many requests right now. "
+                        f"Please wait about {wait_time} seconds and try again. "
+                        f"Thanks for your patience!"
+                    )
+
+                raise RAGServiceError(
+                    message=user_message,
+                    details={
+                        "error_type": "rate_limit",
+                        "limit_type": e.limit_type,
+                        "retry_after": e.retry_after
+                    }
+                )
             except Exception as e:
                 logger.error(f"RAG error: {e.__class__.__name__}: {str(e)}")
                 logger.debug(f"RAG traceback: {traceback.format_exc()}")
@@ -168,27 +195,91 @@ async def get_rag_status():
         }
 
 
+@router.post("/transcribe")
+async def transcribe_audio(file: UploadFile = File(...)):
+    """
+    Transcribe audio file using Groq's Whisper API
+
+    Accepts audio files in formats: flac, mp3, mp4, mpeg, mpga, m4a, ogg, wav, webm
+    """
+    logger.info(f"Transcription request received: filename={file.filename}, content_type={file.content_type}")
+
+    # Validate file type
+    allowed_types = ['audio/flac', 'audio/mp3', 'audio/mpeg', 'audio/mp4', 'audio/x-m4a', 'audio/ogg', 'audio/wav', 'audio/webm']
+    allowed_extensions = ['.flac', '.mp3', '.mp4', '.mpeg', '.mpga', '.m4a', '.ogg', '.wav', '.webm']
+
+    file_ext = os.path.splitext(file.filename or '')[1].lower()
+    if file.content_type not in allowed_types and file_ext not in allowed_extensions:
+        logger.warning(f"Invalid file type: {file.content_type}, extension: {file_ext}")
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid file type. Supported formats: {', '.join(allowed_extensions)}"
+        )
+
+    try:
+        # Read file content
+        audio_data = await file.read()
+
+        # Check file size (25 MB for free tier)
+        max_size = 25 * 1024 * 1024  # 25 MB
+        if len(audio_data) > max_size:
+            raise HTTPException(
+                status_code=413,
+                detail=f"File too large. Maximum size is {max_size / (1024 * 1024):.0f} MB"
+            )
+
+        logger.info(f"Audio file size: {len(audio_data)} bytes")
+
+        # Transcribe audio
+        import io
+        audio_file = io.BytesIO(audio_data)
+        transcribed_text = await transcription_service.transcribe_audio(
+            audio_file,
+            filename=file.filename or "audio.webm",
+            language="en"
+        )
+
+        logger.info(f"Transcription successful: {len(transcribed_text)} characters")
+
+        return {
+            "text": transcribed_text,
+            "filename": file.filename,
+            "size_bytes": len(audio_data)
+        }
+
+    except HTTPException:
+        # Re-raise HTTP exceptions
+        raise
+    except Exception as e:
+        logger.error(f"Transcription failed: {e.__class__.__name__}: {str(e)}")
+        logger.debug(f"Transcription traceback: {traceback.format_exc()}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Transcription failed: {str(e)}"
+        )
+
+
 def generate_basic_response(message: str) -> str:
     """
     Generate a basic response without LLM (temporary implementation)
     """
     message_lower = message.lower()
-    
+
     # Simple keyword-based responses
     if any(word in message_lower for word in ['hello', 'hi', 'hey']):
         return "Hi! I'm Robert's AI assistant. I can help answer questions about his background, skills, and projects. What would you like to know?"
-    
+
     elif any(word in message_lower for word in ['skills', 'technologies', 'tech stack']):
         return "Robert specializes in AI/ML technologies including TensorFlow, PyTorch, and scikit-learn. He also works with React, FastAPI, Kubernetes, and various cloud platforms. Would you like to know more about any specific area?"
-    
+
     elif any(word in message_lower for word in ['projects', 'work', 'portfolio']):
         return "Robert's featured projects include Transcriptomatic (a speech-to-text evaluation platform) and a custom AI server build. Both showcase his skills in AI/ML, full-stack development, and infrastructure. Would you like details about either project?"
-    
+
     elif any(word in message_lower for word in ['contact', 'email', 'linkedin', 'github']):
         return "You can reach Robert via email at robert.zeijlon.92@gmail.com, LinkedIn (robert-zeijlon-14015928b), or GitHub (@RZeijlon). He's also available by phone at 072-233 16 26."
-    
+
     elif any(word in message_lower for word in ['experience', 'background', 'about']):
         return "Robert is a recent AI Developer graduate specializing in artificial intelligence and machine learning. He's passionate about local AI models and self-hosted solutions, with a focus on building robust AI solutions from research to production."
-    
+
     else:
         return "I'd be happy to help! I can answer questions about Robert's background, skills, projects, and experience. Feel free to ask about his AI/ML expertise, development projects, or how to get in touch with him."

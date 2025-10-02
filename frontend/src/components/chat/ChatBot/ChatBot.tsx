@@ -20,7 +20,13 @@ const ChatBot = ({ onChatToggle, welcomeMessage }: ChatBotProps) => {
   const [conversationId, setConversationId] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const { isRecording, isTranscribing, toggleRecording } = useVoiceRecorder();
+  const { isRecording, isTranscribing, toggleRecording } = useVoiceRecorder({
+    onTranscriptionComplete: (text: string) => {
+      setInputMessage(text);
+      // Optionally auto-send the transcribed message
+      // handleSendMessage(text);
+    }
+  });
 
   // Use Vite proxy in development, environment variable in production
   const API_BASE_URL = import.meta.env.PROD
@@ -145,9 +151,22 @@ const ChatBot = ({ onChatToggle, welcomeMessage }: ChatBotProps) => {
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Backend request failed:', response.status, response.statusText, errorText);
-        throw new Error(`Backend request failed: ${response.status} ${response.statusText}`);
+        // Try to parse error response as JSON
+        let errorMessage = 'The chat service returned an error. Please try again.';
+        try {
+          const errorData = await response.json();
+          // Extract the detailed error message from the backend
+          if (errorData.detail) {
+            errorMessage = errorData.detail;
+          } else if (errorData.message) {
+            errorMessage = errorData.message;
+          }
+        } catch (parseError) {
+          // If JSON parsing fails, use text
+          const errorText = await response.text();
+          console.error('Backend request failed:', response.status, response.statusText, errorText);
+        }
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
@@ -160,7 +179,8 @@ const ChatBot = ({ onChatToggle, welcomeMessage }: ChatBotProps) => {
         id: (Date.now() + 1).toString(),
         content: data.message || "Sorry, I couldn't process that request.",
         role: 'assistant',
-        timestamp: new Date()
+        timestamp: new Date(),
+        sources: data.sources || []
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
@@ -172,8 +192,9 @@ const ChatBot = ({ onChatToggle, welcomeMessage }: ChatBotProps) => {
       if (error instanceof Error) {
         if (error.message.includes('Failed to fetch')) {
           errorContent = 'Cannot connect to the chat service. Please check your network connection.';
-        } else if (error.message.includes('Backend request failed')) {
-          errorContent = 'The chat service returned an error. Please try again.';
+        } else {
+          // Use the actual error message from the backend
+          errorContent = error.message;
         }
       }
 

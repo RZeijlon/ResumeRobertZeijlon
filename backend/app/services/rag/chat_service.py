@@ -3,6 +3,7 @@ Chat service for generating AI responses using Groq API
 """
 
 import os
+import re
 from typing import Optional
 import aiohttp
 
@@ -11,13 +12,22 @@ from app.core.logging import get_logger
 logger = get_logger(__name__)
 
 
+class RateLimitError(Exception):
+    """Custom exception for rate limit errors"""
+    def __init__(self, message: str, limit_type: str, retry_after: Optional[int] = None):
+        self.message = message
+        self.limit_type = limit_type  # 'TPM', 'RPM', 'TPD', 'RPD'
+        self.retry_after = retry_after
+        super().__init__(self.message)
+
+
 class ChatService:
     """Service for generating chat responses using LLM"""
 
     def __init__(self):
         self.groq_api_key = os.getenv("GROQ_API_KEY")
         self.system_prompt = self._create_system_prompt()
-        self.model = "llama-3.3-70b-versatile"
+        self.model = "openai/gpt-oss-120b"
         self.api_url = "https://api.groq.com/openai/v1/chat/completions"
 
     def _create_system_prompt(self) -> str:
@@ -92,17 +102,57 @@ Always base your responses on the provided context about Robert's background and
                         response_text = data["choices"][0]["message"]["content"]
                         logger.info("Successfully generated chat response")
                         return response_text
+                    elif response.status == 429:
+                        # Rate limit exceeded
+                        error_data = await response.json()
+                        error_message = error_data.get("error", {}).get("message", "")
+                        logger.warning(f"Rate limit exceeded: {error_message}")
+
+                        # Parse the error message to extract limit type and retry time
+                        limit_type = self._parse_rate_limit_type(error_message)
+                        retry_after = self._parse_retry_after(error_message)
+
+                        raise RateLimitError(error_message, limit_type, retry_after)
                     else:
                         error_text = await response.text()
                         logger.error(f"Groq API error {response.status}: {error_text}")
                         return "I'm experiencing technical difficulties. Please try again later."
 
+        except RateLimitError:
+            # Re-raise to be handled by the API endpoint
+            raise
         except aiohttp.ClientError as e:
             logger.error(f"HTTP error generating response: {e}")
             return "I'm sorry, I couldn't connect to the AI service. Please try again."
         except Exception as e:
             logger.error(f"Unexpected error generating response: {e}")
             return "I'm sorry, I encountered an error. Please try again."
+
+    def _parse_rate_limit_type(self, error_message: str) -> str:
+        """
+        Parse the rate limit type from error message
+        Returns: 'TPM', 'RPM', 'TPD', or 'RPD'
+        """
+        if "tokens per minute" in error_message.lower() or "(tpm)" in error_message.lower():
+            return "TPM"
+        elif "requests per minute" in error_message.lower() or "(rpm)" in error_message.lower():
+            return "RPM"
+        elif "tokens per day" in error_message.lower() or "(tpd)" in error_message.lower():
+            return "TPD"
+        elif "requests per day" in error_message.lower() or "(rpd)" in error_message.lower():
+            return "RPD"
+        return "UNKNOWN"
+
+    def _parse_retry_after(self, error_message: str) -> Optional[int]:
+        """
+        Parse retry-after time from error message
+        Returns: seconds to wait, or None if not found
+        """
+        # Look for pattern like "Please try again in 30s" or "try again in 1.5s"
+        match = re.search(r'try again in ([\d.]+)s', error_message)
+        if match:
+            return int(float(match.group(1)))
+        return None
 
 
 # Global instance
