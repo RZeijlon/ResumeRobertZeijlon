@@ -9,6 +9,25 @@
         "navbar": false
       },
       {
+        "id": "accomplishments-featured",
+        "component": "ProjectGrid",
+        "files": [
+          "components/accomplishments/rag-system.md"
+        ],
+        "width": "full",
+        "navbar": false
+      },
+      {
+        "id": "accomplishments-supporting",
+        "component": "ProjectGrid",
+        "files": [
+          "components/accomplishments/ai-server.md",
+          "components/accomplishments/digital-sovereignty.md"
+        ],
+        "width": "dynamic",
+        "navbar": false
+      },
+      {
         "id": "about",
         "component": "AboutSection",
         "file": "sections/about.md",
@@ -48,7 +67,7 @@
           "components/projects/transcriptomatic.md",
           "components/projects/ai-server-build.md"
         ],
-        "width": "full",
+        "width": "dynamic",
         "navbar": false
       },
       {
