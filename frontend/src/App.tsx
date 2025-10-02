@@ -1,6 +1,6 @@
 import './App.css'
 import MatrixBackground from './MatrixBackground'
-import ChatBot from './ChatBot'
+import ChatBot from './components/chat/ChatBot'
 import { useState, useEffect } from 'react'
 import { useContent } from './contexts/ContentContext'
 import { useTheme } from './contexts/ThemeContext'

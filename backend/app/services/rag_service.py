@@ -1,313 +1,78 @@
 """
 RAG (Retrieval Augmented Generation) service for context-aware chat responses
+Refactored to use modular service components
 """
 
-import asyncio
-import asyncpg
-from typing import List, Dict, Any, Optional, Tuple
-import json
-import os
-from pathlib import Path
+from typing import Dict, Any
 
-from app.core.config import settings
 from app.core.logging import get_logger
-from app.services.embedding_service import embedding_service, ContentChunk
-from app.services.content_service import content_service
-from app.utils.markdown import parse_frontmatter
+from app.repositories.vector_repository import vector_repository
+from app.services.rag.context_builder import ContextBuilder
+from app.services.rag.chat_service import chat_service
+from app.services.rag.content_processor import ContentProcessor
 
 logger = get_logger(__name__)
 
 
-class VectorStore:
-    """Vector database operations for embeddings"""
-    
-    def __init__(self):
-        self.connection_pool: Optional[asyncpg.Pool] = None
-    
-    async def initialize(self):
-        """Initialize database connection pool"""
-        try:
-            self.connection_pool = await asyncpg.create_pool(
-                settings.VECTOR_DB_URL,
-                min_size=1,
-                max_size=10,
-                command_timeout=60
-            )
-            logger.info("Vector store initialized successfully")
-        except Exception as e:
-            logger.error(f"Failed to initialize vector store: {e}")
-    
-    async def close(self):
-        """Close database connections"""
-        if self.connection_pool:
-            await self.connection_pool.close()
-    
-    async def store_embedding(self, chunk: ContentChunk, embedding: List[float]) -> bool:
-        """Store content chunk and its embedding in the database"""
-        if not self.connection_pool:
-            await self.initialize()
-        
-        try:
-            async with self.connection_pool.acquire() as conn:
-                # Convert embedding list to pgvector format
-                embedding_str = f"[{','.join(map(str, embedding))}]"
-                
-                await conn.execute("""
-                    INSERT INTO content_embeddings 
-                    (content_id, file_path, content, metadata, embedding)
-                    VALUES ($1, $2, $3, $4, $5)
-                    ON CONFLICT (content_id) DO UPDATE SET
-                        content = EXCLUDED.content,
-                        metadata = EXCLUDED.metadata,
-                        embedding = EXCLUDED.embedding,
-                        updated_at = NOW()
-                """, chunk.content_id, chunk.file_path, chunk.content, 
-                    json.dumps(chunk.metadata), embedding_str)
-            return True
-        except Exception as e:
-            logger.error(f"Error storing embedding: {e}")
-            return False
-    
-    async def similarity_search(self, query_embedding: List[float], limit: int = 5, threshold: float = 0.7) -> List[Dict[str, Any]]:
-        """Perform similarity search for relevant content"""
-        if not self.connection_pool:
-            await self.initialize()
-        
-        try:
-            async with self.connection_pool.acquire() as conn:
-                # Convert query embedding to pgvector format
-                query_embedding_str = f"[{','.join(map(str, query_embedding))}]"
-                
-                results = await conn.fetch("""
-                    SELECT content_id, file_path, content, metadata,
-                           1 - (embedding <=> $1::vector) as similarity
-                    FROM content_embeddings
-                    WHERE 1 - (embedding <=> $1::vector) > $3
-                    ORDER BY embedding <=> $1::vector
-                    LIMIT $2
-                """, query_embedding_str, limit, threshold)
-                
-                return [
-                    {
-                        "content_id": row["content_id"],
-                        "file_path": row["file_path"],
-                        "content": row["content"],
-                        "metadata": json.loads(row["metadata"]) if isinstance(row["metadata"], str) else row["metadata"],
-                        "similarity": float(row["similarity"])
-                    }
-                    for row in results
-                ]
-        except Exception as e:
-            logger.error(f"Error in similarity search: {e}")
-            return []
-    
-    async def get_content_by_type(self, content_type: str) -> List[Dict[str, Any]]:
-        """Get content by type (section, skill, project, etc.)"""
-        if not self.connection_pool:
-            await self.initialize()
-        
-        try:
-            async with self.connection_pool.acquire() as conn:
-                results = await conn.fetch("""
-                    SELECT content_id, file_path, content, metadata
-                    FROM content_embeddings
-                    WHERE metadata->>'type' = $1
-                    ORDER BY content_id
-                """, content_type)
-                
-                return [
-                    {
-                        "content_id": row["content_id"],
-                        "file_path": row["file_path"],
-                        "content": row["content"],
-                        "metadata": row["metadata"]
-                    }
-                    for row in results
-                ]
-        except Exception as e:
-            logger.error(f"Error fetching content by type: {e}")
-            return []
-
-
 class RAGService:
-    """Main RAG service for content-aware chat responses"""
-    
+    """Main RAG service orchestrating context retrieval and response generation"""
+
     def __init__(self):
-        self.vector_store = VectorStore()
-        self.groq_api_key = os.getenv("GROQ_API_KEY")
-        self.system_prompt = self._create_system_prompt()
-    
-    def _create_system_prompt(self) -> str:
-        """Create the system prompt for the AI assistant"""
-        return """You are an AI assistant representing Robert Zeijlon's professional portfolio. You are knowledgeable about his:
+        self.vector_repo = vector_repository
+        self.context_builder = ContextBuilder(self.vector_repo)
+        self.chat_service = chat_service
+        self.content_processor = ContentProcessor(self.vector_repo)
 
-- Technical skills in AI/ML, software development, and infrastructure
-- Professional projects and achievements  
-- Career background and experience
-- Personal philosophy and approach to technology
-- Contact information and availability
-
-Guidelines:
-1. Provide helpful, accurate information based on the context provided
-2. If asked about something not in the context, politely say you don't have that specific information
-3. Be professional but friendly and conversational
-4. Focus on Robert's technical capabilities and professional experience
-5. Encourage visitors to reach out if they're interested in collaboration
-
-Always base your responses on the provided context about Robert's background and experience."""
-
-    async def initialize(self):
-        """Initialize the RAG service"""
-        await self.vector_store.initialize()
+    async def initialize(self) -> None:
+        """Initialize the RAG service and its dependencies"""
+        await self.vector_repo.initialize()
         logger.info("RAG service initialized")
-    
-    async def process_content_directory(self, force_refresh: bool = False) -> Dict[str, Any]:
-        """Process all content files and generate embeddings"""
-        logger.info("Processing content directory for embeddings...")
-        
-        content_path = Path(settings.CONTENT_PATH)
-        if not content_path.exists():
-            return {"error": "Content directory not found"}
-        
-        stats = {
-            "processed_files": 0,
-            "generated_embeddings": 0,
-            "errors": 0,
-            "skipped": 0
-        }
-        
-        # Process all markdown files
-        markdown_files = list(content_path.rglob("*.md"))
-        
-        for file_path in markdown_files:
-            try:
-                relative_path = file_path.relative_to(content_path)
-                
-                # Read file content
-                content = file_path.read_text(encoding='utf-8')
-                
-                # Extract metadata
-                metadata = embedding_service.extract_metadata_from_content(content, str(relative_path))
-                metadata['id'] = str(relative_path).replace('/', '_').replace('.md', '')
-                
-                # Chunk content
-                chunks = embedding_service.chunk_content(content, str(relative_path), metadata)
-                
-                # Generate embeddings for each chunk
-                for chunk in chunks:
-                    embedding = await embedding_service.generate_embedding(chunk.content)
-                    if embedding:
-                        success = await self.vector_store.store_embedding(chunk, embedding)
-                        if success:
-                            stats["generated_embeddings"] += 1
-                        else:
-                            stats["errors"] += 1
-                    else:
-                        stats["skipped"] += 1
-                
-                stats["processed_files"] += 1
-                logger.info(f"Processed {relative_path} ({len(chunks)} chunks)")
-                
-            except Exception as e:
-                logger.error(f"Error processing {file_path}: {e}")
-                stats["errors"] += 1
-        
-        logger.info(f"Content processing complete: {stats}")
-        return stats
-    
-    async def retrieve_context(self, query: str, max_results: int = 5) -> List[Dict[str, Any]]:
-        """Retrieve relevant context for a query"""
-        # Generate embedding for the query
-        query_embedding = await embedding_service.generate_embedding(query)
-        if not query_embedding:
-            logger.warning("Could not generate embedding for query")
-            return []
-        
-        # Search for similar content
-        results = await self.vector_store.similarity_search(
-            query_embedding, 
-            limit=max_results,
-            threshold=0.3  # Lower threshold for more results
-        )
-        
-        return results
-    
-    def format_context(self, context_results: List[Dict[str, Any]]) -> str:
-        """Format retrieved context for the LLM"""
-        if not context_results:
-            return "No specific context available."
-        
-        formatted_context = "Relevant information about Robert Zeijlon:\n\n"
-        
-        for i, result in enumerate(context_results, 1):
-            metadata = result.get("metadata", {})
-            content_type = metadata.get("type", "content")
-            section = metadata.get("section", "")
-            similarity = result.get("similarity", 0)
-            
-            formatted_context += f"{i}. [{content_type.title()}] "
-            if section:
-                formatted_context += f"({section}) "
-            formatted_context += f"(relevance: {similarity:.2f})\n"
-            formatted_context += f"{result['content']}\n\n"
-        
-        return formatted_context
-    
-    async def generate_response(self, query: str, context: str) -> str:
-        """Generate AI response using Groq API"""
-        if not self.groq_api_key:
-            return "I'm sorry, but the AI service is not configured. Please check the API key settings."
-        
-        try:
-            import aiohttp
-            
-            async with aiohttp.ClientSession() as session:
-                headers = {
-                    "Authorization": f"Bearer {self.groq_api_key}",
-                    "Content-Type": "application/json"
-                }
-                
-                messages = [
-                    {"role": "system", "content": self.system_prompt},
-                    {"role": "system", "content": f"Context:\n{context}"},
-                    {"role": "user", "content": query}
-                ]
-                
-                payload = {
-                    "model": "llama-3.3-70b-versatile",  # Groq's best model
-                    "messages": messages,
-                    "temperature": 0.7,
-                    "max_tokens": 1000
-                }
-                
-                async with session.post(
-                    "https://api.groq.com/openai/v1/chat/completions",
-                    headers=headers,
-                    json=payload
-                ) as response:
-                    if response.status == 200:
-                        data = await response.json()
-                        return data["choices"][0]["message"]["content"]
-                    else:
-                        error_text = await response.text()
-                        logger.error(f"Groq API error {response.status}: {error_text}")
-                        return "I'm experiencing technical difficulties. Please try again later."
-                        
-        except Exception as e:
-            logger.error(f"Error generating response: {e}")
-            return "I'm sorry, I encountered an error. Please try again."
-    
-    async def chat(self, query: str) -> Dict[str, Any]:
-        """Main chat method with RAG"""
+
+    async def process_content_directory(
+        self,
+        force_refresh: bool = False
+    ) -> Dict[str, Any]:
+        """
+        Process all content files and generate embeddings
+
+        Args:
+            force_refresh: If True, reprocess all content
+
+        Returns:
+            Processing statistics
+        """
+        return await self.content_processor.process_content_directory(force_refresh)
+
+    async def chat(
+        self,
+        query: str,
+        max_context_results: int = 5,
+        context_threshold: float = 0.3
+    ) -> Dict[str, Any]:
+        """
+        Main chat method with RAG
+
+        Args:
+            query: User query
+            max_context_results: Maximum number of context results to retrieve
+            context_threshold: Minimum similarity threshold for context
+
+        Returns:
+            Response with sources and metadata
+        """
         # Retrieve relevant context
-        context_results = await self.retrieve_context(query)
-        
+        context_results = await self.context_builder.retrieve_context(
+            query,
+            max_results=max_context_results,
+            threshold=context_threshold
+        )
+
         # Format context for LLM
-        context = self.format_context(context_results)
-        
+        context = self.context_builder.format_context(context_results)
+
         # Generate response
-        response = await self.generate_response(query, context)
-        
+        response = await self.chat_service.generate_response(query, context)
+
         return {
             "response": response,
             "sources": [

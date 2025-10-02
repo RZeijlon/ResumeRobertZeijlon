@@ -1,0 +1,82 @@
+/* Input styles extracted from ChatBot.css */
+.chat-input {
+  display: flex;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-top: 1px solid var(--border-color, #e0e0e0);
+  background: var(--bg-color, white);
+  align-items: center;
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: 2rem;
+  outline: none;
+  font-size: 0.9rem;
+  background: var(--input-bg, white);
+  color: var(--text-color, #333);
+}
+
+.chat-input input:focus {
+  border-color: var(--accent-color, #007bff);
+}
+
+.chat-input input:disabled {
+  background: var(--disabled-bg, #f5f5f5);
+  cursor: not-allowed;
+}
+
+.chat-input button {
+  padding: 0.75rem;
+  background: var(--accent-color, #007bff);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+}
+
+.chat-input button:hover:not(:disabled) {
+  background: var(--accent-hover, #0056b3);
+  transform: scale(1.05);
+}
+
+.chat-input button:disabled {
+  background: var(--disabled-color, #ccc);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.voice-button {
+  background: var(--voice-button-bg, #28a745) !important;
+}
+
+.voice-button:hover:not(:disabled) {
+  background: var(--voice-button-hover, #218838) !important;
+}
+
+.voice-button.recording {
+  background: var(--recording-color, #dc3545) !important;
+  animation: pulse 1.5s infinite;
+}
+
+.chat-close-mobile {
+  background: var(--close-button-bg, #6c757d) !important;
+  order: -1;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}

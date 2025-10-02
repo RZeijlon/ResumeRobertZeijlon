@@ -1,15 +1,19 @@
-import React from 'react'
-import MarkdownRenderer from './shared/MarkdownRenderer'
-import type { ContentItem, PersonalInfo } from '../types'
-import { FaLinkedin, FaGithub, FaEnvelope, FaPhone } from 'react-icons/fa'
+import React from 'react';
+import HeroSection from './sections/HeroSection';
+import AboutSection from './sections/AboutSection';
+import SkillsSection from './sections/SkillsSection';
+import ProjectsSection from './sections/ProjectsSection';
+import ContactSection from './sections/ContactSection';
+import MarkdownRenderer from './shared/MarkdownRenderer';
+import type { ContentItem, PersonalInfo } from '../types';
 
 interface DynamicSectionProps {
-  sectionId: string
-  component: string
-  content?: ContentItem
-  contents?: ContentItem[]
-  width: 'full' | 'dynamic'
-  personalInfo?: PersonalInfo
+  sectionId: string;
+  component: string;
+  content?: ContentItem;
+  contents?: ContentItem[];
+  width: 'full' | 'dynamic';
+  personalInfo?: PersonalInfo;
 }
 
 export const DynamicSection: React.FC<DynamicSectionProps> = ({
@@ -20,206 +24,41 @@ export const DynamicSection: React.FC<DynamicSectionProps> = ({
   width,
   personalInfo
 }) => {
-  const renderHeroSection = () => {
-    if (!content) return null
-    
-    return (
-      <section id={sectionId} className="hero">
-        <div className="hero-title">
-          <h1>{content.metadata.title}</h1>
-        </div>
-        {content.metadata.subtitle && (
-          <div className="hero-text">
-            <p>{content.metadata.subtitle}</p>
-          </div>
-        )}
-        {content.content.trim() && (
-          <div className="hero-text">
-            <MarkdownRenderer content={content} />
-          </div>
-        )}
-      </section>
-    )
-  }
-
-  const renderAboutSection = () => {
-    if (!content) return null
-    
-    return (
-      <section id={sectionId} className="about">
-        <div className="about-header">
-          <h2>{content.metadata.title}</h2>
-        </div>
-        <div className="about-content">
-          <div className="about-intro">
-            <MarkdownRenderer content={{...content, content: content.content.replace(/^#\s+.*$/m, '').trim()}} />
-          </div>
-        </div>
-      </section>
-    )
-  }
-
-  const renderSkillsGrid = () => {
-    if (!contents) return null
-
-    const sortedContents = contents.sort((a, b) => {
-      const aOrder = typeof a.metadata.order === 'number' ? a.metadata.order : 0
-      const bOrder = typeof b.metadata.order === 'number' ? b.metadata.order : 0
-      return aOrder - bOrder
-    })
-    
-    return (
-      <div className={`skills-grid ${width === 'dynamic' ? 'dynamic-width' : 'full-width'}`}>
-        {sortedContents.map((skillContent) => (
-          <div key={skillContent.id} className="skill-category">
-            <MarkdownRenderer content={skillContent} />
-          </div>
-        ))}
-      </div>
-    )
-  }
-
-  const renderPhilosophySection = () => {
-    if (!content) return null
-    
-    return (
-      <div className="philosophy-statement">
-        <MarkdownRenderer content={content} />
-      </div>
-    )
-  }
-
-  const renderProjectsSection = () => {
-    if (!content) return null
-
-    const title = content.metadata.title || 'Featured Projects'
-
-    return (
-      <section id={sectionId} className="projects">
-        <div className="projects-header">
-          <h2>{title}</h2>
-        </div>
-      </section>
-    )
-  }
-
-  const renderProjectGrid = () => {
-    if (!contents) return null
-
-    const sortedProjects = contents.sort((a, b) => {
-      const aOrder = typeof a.metadata.order === 'number' ? a.metadata.order : 0
-      const bOrder = typeof b.metadata.order === 'number' ? b.metadata.order : 0
-      return aOrder - bOrder
-    })
-
-    return (
-      <div className="project-grid">
-        {sortedProjects.map((project) => {
-          const image = typeof project.metadata.image === 'string' ? project.metadata.image : undefined
-          const title = typeof project.metadata.title === 'string' ? project.metadata.title : undefined
-          const tech = typeof project.metadata.tech === 'string' ? project.metadata.tech : undefined
-          const github = typeof project.metadata.github === 'string' ? project.metadata.github : undefined
-
-          return (
-            <div key={project.id} className={`project-card ${project.metadata.featured ? 'featured' : ''}`}>
-              {image && (
-                <div className="project-image">
-                  <img
-                    src={image.startsWith('/') ? image : `/page_content/assets/images/${image}`}
-                    alt={title || project.id}
-                  />
-                </div>
-              )}
-              <MarkdownRenderer content={project} />
-              {tech && (
-                <p className="project-tech">{tech}</p>
-              )}
-              {github && (
-                <div className="project-links">
-                  <a href={github} target="_blank" rel="noopener noreferrer">
-                    View on GitHub
-                  </a>
-                </div>
-              )}
-            </div>
-          )
-        })}
-      </div>
-    )
-  }
-
-  const renderContactSection = () => {
-    if (!content || !personalInfo) return null
-    
-    return (
-      <section id={sectionId} className="contact">
-        <div className="contact-header">
-          <h2>{content.metadata.title}</h2>
-        </div>
-        
-        <div className="contact-intro">
-          <MarkdownRenderer content={{...content, content: content.content.replace(/^#\s+.*$/m, '').trim()}} />
-        </div>
-        
-        <div className="contact-links">
-          <a 
-            href={personalInfo.social.linkedin.url} 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="contact-link linkedin"
-          >
-            <FaLinkedin className="contact-icon" />
-            <span>LinkedIn</span>
-          </a>
-          
-          <a 
-            href={personalInfo.social.github.url} 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="contact-link github"
-          >
-            <FaGithub className="contact-icon" />
-            <span>GitHub</span>
-          </a>
-          
-          <a href={`mailto:${personalInfo.email}`} className="contact-link email">
-            <FaEnvelope className="contact-icon" />
-            <span>{personalInfo.email}</span>
-          </a>
-          
-          <a href={`tel:${personalInfo.phone.replace(/[^\d+]/g, '')}`} className="contact-link phone">
-            <FaPhone className="contact-icon" />
-            <span>{personalInfo.phone}</span>
-          </a>
-        </div>
-      </section>
-    )
-  }
-
-  // Render based on component type
+  // Route to specialized section components
   switch (component) {
     case 'HeroSection':
-      return renderHeroSection()
+      return content ? <HeroSection sectionId={sectionId} content={content} /> : null;
+
     case 'AboutSection':
-      return renderAboutSection()
+      return content ? <AboutSection sectionId={sectionId} content={content} /> : null;
+
     case 'SkillsGrid':
-      return renderSkillsGrid()
+      return contents ? <SkillsSection contents={contents} width={width} /> : null;
+
     case 'PhilosophySection':
-      return renderPhilosophySection()
+      return content ? (
+        <div className="philosophy-statement">
+          <MarkdownRenderer content={content} />
+        </div>
+      ) : null;
+
     case 'ProjectsSection':
-      return renderProjectsSection()
     case 'ProjectGrid':
-      return renderProjectGrid()
+      return <ProjectsSection sectionId={sectionId} content={content} contents={contents} />;
+
     case 'ContactSection':
-      return renderContactSection()
+      return content && personalInfo ? (
+        <ContactSection sectionId={sectionId} content={content} personalInfo={personalInfo} />
+      ) : null;
+
     default:
-      // Generic section renderer
+      // Generic section renderer for unknown component types
       if (content) {
         return (
           <section id={sectionId} className={`section-${sectionId}`}>
             <MarkdownRenderer content={content} />
           </section>
-        )
+        );
       }
       if (contents) {
         return (
@@ -230,10 +69,10 @@ export const DynamicSection: React.FC<DynamicSectionProps> = ({
               </div>
             ))}
           </div>
-        )
+        );
       }
-      return null
+      return null;
   }
-}
+};
 
-export default DynamicSection
+export default DynamicSection;
