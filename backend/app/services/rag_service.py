@@ -76,7 +76,12 @@ class RAGService:
         return {
             "response": response,
             "sources": [
-                f"{result['file_path']} ({result.get('metadata', {}).get('type', 'content')}, {result['similarity']:.2f})"
+                {
+                    "content": result.get('content', ''),
+                    "file_path": result['file_path'],
+                    "similarity": result['similarity'],
+                    "metadata": result.get('metadata', {})
+                }
                 for result in context_results
             ],
             "context_used": len(context_results) > 0
