@@ -162,9 +162,9 @@ const ChatBot = ({ onChatToggle, welcomeMessage }: ChatBotProps) => {
             errorMessage = errorData.message;
           }
         } catch (parseError) {
-          // If JSON parsing fails, use text
-          const errorText = await response.text();
-          console.error('Backend request failed:', response.status, response.statusText, errorText);
+          // If JSON parsing fails, just log the error (response body already consumed)
+          console.error('Backend request failed:', response.status, response.statusText);
+          console.error('Failed to parse error response:', parseError);
         }
         throw new Error(errorMessage);
       }
