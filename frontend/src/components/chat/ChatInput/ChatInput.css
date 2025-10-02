@@ -3,24 +3,25 @@
   display: flex;
   gap: 0.5rem;
   padding: 1rem;
-  border-top: 1px solid var(--border-color, #e0e0e0);
-  background: var(--bg-color, white);
+  border-top: 2px solid var(--border-color);
+  background: var(--background-primary);
   align-items: center;
 }
 
 .chat-input input {
   flex: 1;
   padding: 0.75rem 1rem;
-  border: 1px solid var(--border-color, #e0e0e0);
+  border: 2px solid var(--border-color);
   border-radius: 2rem;
   outline: none;
   font-size: 0.9rem;
-  background: var(--input-bg, white);
-  color: var(--text-color, #333);
+  background: var(--background-secondary);
+  color: var(--text-primary);
+  transition: border-color 0.3s ease;
 }
 
 .chat-input input:focus {
-  border-color: var(--accent-color, #007bff);
+  border-color: var(--highlight);
 }
 
 .chat-input input:disabled {
@@ -30,9 +31,9 @@
 
 .chat-input button {
   padding: 0.75rem;
-  background: var(--accent-color, #007bff);
-  color: white;
-  border: none;
+  background: var(--highlight);
+  color: var(--background-primary);
+  border: 2px solid var(--border-color);
   border-radius: 50%;
   cursor: pointer;
   display: flex;
@@ -44,31 +45,35 @@
 }
 
 .chat-input button:hover:not(:disabled) {
-  background: var(--accent-hover, #0056b3);
+  background: var(--highlight-hover);
   transform: scale(1.05);
 }
 
 .chat-input button:disabled {
-  background: var(--disabled-color, #ccc);
+  background: var(--background-secondary);
+  color: var(--text-muted);
   cursor: not-allowed;
   transform: none;
+  opacity: 0.5;
 }
 
 .voice-button {
-  background: var(--voice-button-bg, #28a745) !important;
+  background: var(--highlight) !important;
 }
 
 .voice-button:hover:not(:disabled) {
-  background: var(--voice-button-hover, #218838) !important;
+  background: var(--highlight-hover) !important;
 }
 
 .voice-button.recording {
-  background: var(--recording-color, #dc3545) !important;
+  background: #dc3545 !important;
+  border-color: #dc3545 !important;
   animation: pulse 1.5s infinite;
 }
 
 .chat-close-mobile {
-  background: var(--close-button-bg, #6c757d) !important;
+  background: var(--background-secondary) !important;
+  color: var(--highlight) !important;
   order: -1;
 }
 
