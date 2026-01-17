@@ -1,0 +1,239 @@
+/* Professional Resume Base Styles */
+
+@page {
+    size: A4;
+    margin: 1.5cm;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 10pt;
+    line-height: 1.5;
+    color: #2c3e50;
+    background: white;
+}
+
+/* Header */
+.resume-header {
+    border-bottom: 3px solid #3498db;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.name {
+    font-size: 28pt;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+
+.title {
+    font-size: 14pt;
+    color: #3498db;
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+
+.contact-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    font-size: 9pt;
+    color: #7f8c8d;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.contact-item::before {
+    content: '•';
+    color: #3498db;
+    font-weight: bold;
+}
+
+.contact-item:first-child::before {
+    content: '';
+}
+
+/* Section Headers */
+.section {
+    margin-bottom: 20px;
+    page-break-inside: avoid;
+}
+
+.section-title {
+    font-size: 14pt;
+    font-weight: 700;
+    color: #2c3e50;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 5px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Professional Summary */
+.summary-text {
+    text-align: justify;
+    line-height: 1.6;
+    color: #34495e;
+}
+
+/* Skills Section */
+.skills-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.skill-category {
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 4px;
+    border-left: 3px solid #3498db;
+}
+
+.skill-category-title {
+    font-size: 11pt;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 6px;
+}
+
+.skill-list {
+    list-style: none;
+    font-size: 9pt;
+    color: #555;
+}
+
+.skill-list li {
+    padding: 2px 0;
+    padding-left: 12px;
+    position: relative;
+}
+
+.skill-list li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: #3498db;
+    font-size: 8pt;
+}
+
+/* Projects Section */
+.project {
+    margin-bottom: 15px;
+    page-break-inside: avoid;
+}
+
+.project-header {
+    margin-bottom: 8px;
+}
+
+.project-title {
+    font-size: 12pt;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 3px;
+}
+
+.project-tech {
+    font-size: 9pt;
+    color: #7f8c8d;
+    font-style: italic;
+}
+
+.project-description {
+    font-size: 9.5pt;
+    color: #555;
+    margin-bottom: 8px;
+    text-align: justify;
+    line-height: 1.5;
+}
+
+.achievements-list {
+    list-style: none;
+    font-size: 9pt;
+    color: #555;
+}
+
+.achievements-list li {
+    padding: 3px 0;
+    padding-left: 15px;
+    position: relative;
+    line-height: 1.4;
+}
+
+.achievements-list li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: #27ae60;
+    font-weight: bold;
+    font-size: 10pt;
+}
+
+/* Links */
+a {
+    color: #3498db;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* QR Code Section */
+.qr-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 2px solid #ecf0f1;
+    text-align: center;
+}
+
+.qr-code {
+    max-width: 100px;
+    height: auto;
+    margin: 0 auto;
+}
+
+.qr-label {
+    font-size: 8pt;
+    color: #7f8c8d;
+    margin-top: 5px;
+}
+
+/* Footer */
+.resume-footer {
+    margin-top: 30px;
+    padding-top: 15px;
+    border-top: 1px solid #ecf0f1;
+    text-align: center;
+    font-size: 8pt;
+    color: #95a5a6;
+}
+
+/* Print optimizations */
+@media print {
+    body {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
+
+    .section {
+        page-break-inside: avoid;
+    }
+
+    .project {
+        page-break-inside: avoid;
+    }
+}

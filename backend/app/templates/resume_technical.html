@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ personal.name }} - Resume</title>
+    <style>
+        {{ css }}
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="resume-header">
+        <h1 class="name">{{ personal.name }}</h1>
+        <h2 class="title">{{ personal.title }}</h2>
+        <div class="contact-info">
+            {% if personal.email %}
+            <div class="contact-item">{{ personal.email }}</div>
+            {% endif %}
+            {% if personal.phone %}
+            <div class="contact-item">{{ personal.phone }}</div>
+            {% endif %}
+            {% if personal.location %}
+            <div class="contact-item">{{ personal.location }}</div>
+            {% endif %}
+            {% if personal.linkedin %}
+            <div class="contact-item"><a href="{{ personal.linkedin }}">LinkedIn</a></div>
+            {% endif %}
+            {% if personal.github %}
+            <div class="contact-item"><a href="{{ personal.github }}">GitHub</a></div>
+            {% endif %}
+        </div>
+    </header>
+
+    <!-- Professional Summary -->
+    <section class="section">
+        <h3 class="section-title">Professional Summary</h3>
+        <div class="summary-text">
+            {{ summary }}
+        </div>
+    </section>
+
+    <!-- Technical Skills -->
+    <section class="section">
+        <h3 class="section-title">Technical Skills</h3>
+        <div class="skills-grid">
+            {% for category, skill_list in skills.items() %}
+            <div class="skill-category">
+                <h4 class="skill-category-title">{{ category }}</h4>
+                <ul class="skill-list">
+                    {% for skill in skill_list %}
+                    <li>{{ skill }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Key Projects -->
+    <section class="section">
+        <h3 class="section-title">Key Projects</h3>
+        {% for project in projects %}
+        <div class="project">
+            <div class="project-header">
+                <h4 class="project-title">{{ project.title }}</h4>
+                <div class="project-tech">{{ project.tech }}</div>
+            </div>
+            <p class="project-description">{{ project.description }}</p>
+            {% if project.achievements %}
+            <ul class="achievements-list">
+                {% for achievement in project.achievements %}
+                <li>{{ achievement }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </section>
+
+    <!-- QR Code -->
+    {% if qr_code %}
+    <section class="qr-section">
+        <img src="data:image/png;base64,{{ qr_code }}" alt="Portfolio QR Code" class="qr-code">
+        <p class="qr-label">Scan to view online portfolio</p>
+    </section>
+    {% endif %}
+
+    <!-- Footer -->
+    <footer class="resume-footer">
+        <p>Generated on {{ generated_date }} | Visit portfolio for more information</p>
+    </footer>
+</body>
+</html>

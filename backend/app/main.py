@@ -11,6 +11,7 @@ from pathlib import Path
 from app.api.v1.content import router as content_router
 from app.api.v1.chat import router as chat_router
 from app.api.v1.theme import router as theme_router
+from app.api.v1.resume import router as resume_router
 from app.core.config import settings
 from app.core.logging import setup_logging, get_logger
 from app.core.error_handlers import register_exception_handlers
@@ -78,8 +79,9 @@ if Path(settings.CONTENT_PATH).exists():
 
 # Include API routers
 app.include_router(content_router, prefix="/api/v1/content", tags=["content"])
-app.include_router(chat_router, prefix="/api/v1/chat", tags=["chat"])  
+app.include_router(chat_router, prefix="/api/v1/chat", tags=["chat"])
 app.include_router(theme_router, prefix="/api/v1/theme", tags=["theme"])
+app.include_router(resume_router, prefix="/api/v1/resume", tags=["resume"])
 
 
 @app.get("/")
@@ -93,6 +95,7 @@ async def root():
             "content": "/api/v1/content",
             "chat": "/api/v1/chat",
             "theme": "/api/v1/theme",
+            "resume": "/api/v1/resume",
             "docs": "/docs",
             "page_content": "/page_content"
         }

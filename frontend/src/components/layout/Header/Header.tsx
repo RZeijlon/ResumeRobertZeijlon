@@ -1,8 +1,17 @@
-import { FaBars, FaTimes } from 'react-icons/fa'
+import { FaBars, FaTimes, FaDownload } from 'react-icons/fa'
 import { useContent } from '../../../contexts'
 import AccessibilityMenu from '../../shared/AccessibilityMenu'
 import SimpleThemeSwitcher from '../../shared/SimpleThemeSwitcher'
 import type { NavbarItem } from '../../../types'
+
+const handleDownloadResume = () => {
+  const link = document.createElement('a')
+  link.href = '/api/v1/resume/generate?format=technical'
+  link.download = 'Robert_Zeijlon_Resume.pdf'
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+}
 
 interface HeaderProps {
   isMobile: boolean
@@ -47,6 +56,11 @@ export const Header = ({ isMobile, showMobileMenu, setShowMobileMenu, onOpenChat
                 </button>
               </li>
             )}
+            <li>
+              <button className="resume-download-button" onClick={handleDownloadResume}>
+                <FaDownload /> Resume
+              </button>
+            </li>
             <li className="theme-switcher-nav">
               <SimpleThemeSwitcher />
             </li>
@@ -82,6 +96,11 @@ export const Header = ({ isMobile, showMobileMenu, setShowMobileMenu, onOpenChat
                   </button>
                 </li>
               )}
+              <li>
+                <button className="resume-download-button" onClick={handleDownloadResume}>
+                  <FaDownload /> Resume
+                </button>
+              </li>
               <li className="theme-switcher-mobile">
                 <SimpleThemeSwitcher showLabel={true} />
               </li>

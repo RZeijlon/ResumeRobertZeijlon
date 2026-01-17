@@ -5,9 +5,20 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Install system dependencies
+# WeasyPrint requires: libpango, libcairo, libgdk-pixbuf, gobject for PDF generation
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    libpangoft2-1.0-0 \
+    libcairo2 \
+    libgdk-pixbuf-2.0-0 \
+    libgobject-2.0-0 \
+    libglib2.0-0t64 \
+    libffi-dev \
+    shared-mime-info \
+    fonts-dejavu-core \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and install Python dependencies
