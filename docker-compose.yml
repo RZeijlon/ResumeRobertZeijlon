@@ -14,7 +14,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
-      - "5432:5432"
+      - "23402:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U portfolio -d portfolio"]
       interval: 10s
@@ -31,7 +31,7 @@ services:
       - DATABASE_URL=postgresql://portfolio:portfolio@database:5432/portfolio
       - VECTOR_DB_URL=postgresql://portfolio:portfolio@database:5432/portfolio
       - CONTENT_PATH=/app/page_content
-      - FRONTEND_URL=http://localhost:3000
+      - FRONTEND_URL=http://localhost:23409
       - DEBUG=true
       - GROQ_API_KEY=${GROQ_API_KEY:-}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
@@ -40,7 +40,7 @@ services:
       - ./frontend/public/page_content:/app/page_content:ro
       - ./backend/app:/app/app:ro
     ports:
-      - "8000:8000"
+      - "23401:8000"
     depends_on:
       database:
         condition: service_healthy
@@ -61,7 +61,7 @@ services:
       - ./frontend:/app
       - node_modules:/app/node_modules
     ports:
-      - "5173:5173"
+      - "23409:5173"
     command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
     depends_on:
       - backend
@@ -73,7 +73,7 @@ services:
       dockerfile: frontend/Dockerfile
     container_name: portfolio-frontend
     ports:
-      - "3000:80"
+      - "23400:80"
     depends_on:
       - backend
     profiles:
@@ -84,7 +84,7 @@ services:
     image: redis:7-alpine
     container_name: portfolio-redis
     ports:
-      - "6379:6379"
+      - "23403:6379"
     volumes:
       - redis_data:/data
     profiles:
